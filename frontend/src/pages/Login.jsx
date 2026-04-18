@@ -3,8 +3,10 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import API from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { translations } from "../utils/translations";
 
 const Login = ({ lang = "en" }) => {
+  const t = translations[lang] || translations["en"];
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,34 +23,29 @@ const Login = ({ lang = "en" }) => {
     
     try {
       const res = await API.post("/auth/login", { email, password });
-
-      // ✅ Pass both user and token
       login(res.data.user, res.data.token);
-      toast.success("Welcome back to Shree Sanatan!");
-      
-      // Determine where the user was trying to go before being forced to login
+      toast.success(lang === 'en' ? "Welcome back to Shree Sanatan!" : "श्री सनातन में आपका स्वागत है!");
       const from = location.state?.from?.pathname || "/";
       navigate(from, { replace: true });
     } catch (err) {
       console.error(err);
-      setError(err.response?.data?.message || "Login failed. Please check your credentials.");
-      toast.error("Failed to login");
+      setError(err.response?.data?.message || (lang === 'en' ? "Login failed. Please check your credentials." : "लॉगिन विफल। कृपया अपनी साख जांचें।"));
+      toast.error(lang === 'en' ? "Failed to login" : "लॉगिन करने में विफल");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 bg-gradient-to-br from-orange-50 via-white to-orange-100 relative overflow-hidden font-sans">
-      {/* Background decoration */}
-      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-orange-200/50 blur-3xl mix-blend-multiply pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 rounded-full bg-yellow-200/50 blur-3xl mix-blend-multiply pointer-events-none"></div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 bg-gradient-to-br from-emerald-50 via-white to-green-100 relative overflow-hidden font-sans">
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-emerald-200/50 blur-3xl mix-blend-multiply pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 rounded-full bg-green-200/50 blur-3xl mix-blend-multiply pointer-events-none"></div>
 
       <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100 p-8 sm:p-10">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Welcome Back</h2>
+          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">{t.login}</h2>
           <p className="text-sm border-gray-500 mt-2 text-gray-500">
-            Sign in to continue to <span className="font-semibold text-orange-600">Shree Sanatan Traders</span>
+            Sign in to continue to <span className="font-semibold text-emerald-600">Shree Sanatan Traders</span>
           </p>
         </div>
 
@@ -60,24 +57,24 @@ const Login = ({ lang = "en" }) => {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t.email}</label>
             <input
               type="email"
               placeholder="you@example.com"
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all duration-300 placeholder-gray-400"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all duration-300 placeholder-gray-400"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">{t.password}</label>
             <input
               type="password"
               placeholder="••••••••"
               required
-              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none transition-all duration-300 placeholder-gray-400"
+              className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all duration-300 placeholder-gray-400"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -86,15 +83,15 @@ const Login = ({ lang = "en" }) => {
           <button 
             type="submit" 
             disabled={isLoading}
-            className="w-full py-3.5 px-4 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:-translate-y-0 disabled:hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-orange-500/50"
+            className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed focus:outline-none focus:ring-4 focus:ring-emerald-500/50"
           >
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isLoading ? t.loading : t.login}
           </button>
         </form>
 
         <div className="mt-8 text-center text-sm text-gray-600">
           Don't have an account?{" "}
-          <Link to="/register" className="font-bold text-orange-600 hover:text-orange-500 hover:underline transition-colors">
+          <Link to="/register" className="font-bold text-emerald-600 hover:text-emerald-500 hover:underline transition-colors">
             Create an account
           </Link>
         </div>

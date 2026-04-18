@@ -1,52 +1,98 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { translations } from "../utils/translations";
 
 const ProductCard = ({ product, lang = "en" }) => {
   const { addToCart } = useCart();
+  const [isAdded, setIsAdded] = useState(false);
   const t = translations[lang] || translations["en"];
 
-  // Default fallback image if product has no image
-  const imageUrl = product.image?.[0] || "/box1.png";
+  // ✅ FIXED DATA MAPPING
+  const variant = product.variants?.[0];
+  const imageUrl = product.images?.[0] || "/box1.png";
+  const price = variant?.price || 0;
+  const unit = variant?.unit || "1 Pc";
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+    setIsAdded(true);
+    setTimeout(() => setIsAdded(false), 2000);
+  };
 
   return (
-    <div className="group bg-white rounded-2xl border border-orange-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full hover:-translate-y-1">
-      {/* Product Image Section */}
-      <Link to={`/products/${product._id}`} className="relative block aspect-[4/3] overflow-hidden bg-gray-100">
+    <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full border border-gray-100 hover:border-emerald-200 hover:-translate-y-1 relative">
+
+      {/* Status Badges */}
+      <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+        {variant?.stock < 10 && variant?.stock > 0 && (
+          <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
+            {lang === 'en' ? 'Low Stock' : 'कम स्टॉक'}
+          </span>
+        )}
+        {product.isFeatured && (
+          <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">
+            {t.featured}
+          </span>
+        )}
+      </div>
+
+      {/* Image */}
+      <div className="relative block aspect-square overflow-hidden bg-gray-50 flex items-center justify-center p-6 group/img cursor-pointer">
+        <Link to={`/product/${product._id}`} className="absolute inset-0 z-0"></Link>
+
         <img
           src={imageUrl}
           alt={product.name}
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-contain transition-transform duration-700 group-hover/img:scale-110 relative z-10 pointer-events-none"
         />
-        {/* Optional Overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300"></div>
-      </Link>
 
-      {/* Product Info Section */}
-      <div className="p-5 flex flex-col flex-1">
-        <Link to={`/products/${product._id}`} className="block mb-2">
-          <h3 className="text-xl font-bold text-gray-900 line-clamp-1 group-hover:text-orange-600 transition-colors">
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 z-20 flex items-center justify-center pointer-events-none">
+          <Link
+            to={`/product/${product._id}`}
+            className="pointer-events-auto translate-y-4 group-hover/img:translate-y-0 transition-transform duration-300 bg-white text-gray-900 font-bold px-6 py-2 rounded-full shadow-lg hover:bg-emerald-50 hover:text-emerald-600"
+          >
+            {t.viewDetails}
+          </Link>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="p-5 flex flex-col flex-1 bg-white relative">
+        <Link to={`/product/${product._id}`} className="block mb-1">
+          <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-emerald-600 transition-colors">
             {product.name}
           </h3>
         </Link>
-        <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
-          {product.description || "Premium quality product from Shree Sanatan Traders."}
+
+        <p className="text-xs text-gray-400 capitalize mb-3 font-medium">
+          {product.category || "General"} • {unit}
         </p>
 
-        {/* Footer: Price and Action */}
-        <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-100">
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
           <div className="flex flex-col">
-            <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Price</span>
-            <span className="text-xl font-black text-orange-600">₹{product.price}</span>
+            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+              {t.price}
+            </span>
+            <span className="text-xl font-black text-gray-900">
+              ₹{price}
+            </span>
           </div>
-          
+
           <button
-            onClick={() => addToCart(product)}
-            className="flex items-center justify-center bg-orange-100 text-orange-700 font-bold px-4 py-2.5 rounded-xl hover:bg-orange-600 hover:text-white transition-colors duration-300 focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 shadow-sm"
+            onClick={handleAddToCart}
+            disabled={isAdded}
+            className={`flex items-center justify-center font-bold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-sm ${isAdded
+                ? "bg-green-500 text-white shadow-green-200"
+                : "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white hover:shadow-emerald-200"
+              }`}
           >
-            {t.addToCart || "Add to Cart"}
+            {isAdded ? (t.added || "Added ✓") : (t.addToCart || "+ Add")}
           </button>
         </div>
       </div>

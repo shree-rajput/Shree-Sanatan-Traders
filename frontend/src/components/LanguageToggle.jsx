@@ -1,23 +1,21 @@
 import React from "react";
 
 const LanguageToggle = ({ lang, setLang }) => (
-  <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.15)", borderRadius: 20, padding: "3px 6px" }}>
+  <div className="flex gap-1 bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-inner">
     {["en", "hi"].map(l => (
       <button
         key={l}
         onClick={() => setLang(l)}
-        style={{
-          background: lang === l ? "#E87722" : "transparent",
-          color: "#fff", border: "none",
-          borderRadius: 16, padding: "3px 10px",
-          fontSize: 13, fontWeight: lang === l ? 600 : 400,
-          cursor: "pointer",
-        }}
+        className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all duration-300 ${
+          lang === l 
+            ? "bg-emerald-500 text-white shadow-sm" 
+            : "text-emerald-100 hover:text-white"
+        }`}
       >
-        {l === "en" ? "EN" : "हि"}
+        {l === "en" ? "ENG" : "हिन्दी"}
       </button>
     ))}
   </div>
 );
 
-export default LanguageToggle;
+export default LanguageToggle;
