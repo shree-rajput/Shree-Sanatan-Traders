@@ -2,57 +2,73 @@ import React, { useEffect, useState } from "react";
 import API from "../services/api";
 import ProductCard from "../components/ProductCard";
 import { translations } from "../utils/translations";
+import { Link } from "react-router-dom";
 
-const Home = ({ lang }) => {
+const Home = ({ lang = "en" }) => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const t = translations[lang];
+  const [loading, setLoading] = useState(true);
+  const t = translations[lang] || translations["en"]; // Fallback
 
   useEffect(() => {
     API.get("/products")
-      .then(res => setProducts(res.data))
+      .then((res) => setProducts(res.data))
+      .catch((err) => console.error("Error fetching products:", err))
       .finally(() => setLoading(false));
   }, []);
 
   return (
-    <div style={{ padding: "24px" }}>
-      {/* Hero Banner */}
-      <div style={styles.hero}>
-        <h1 style={styles.heroTitle}>{t.appName}</h1>
-        <p style={styles.heroSub}>{t.tagline}</p>
-      </div>
-
-      <h2 style={styles.sectionTitle}>{t.products}</h2>
-
-      {loading ? (
-        <p style={{ textAlign: "center", color: "#757575" }}>{t.loading}</p>
-      ) : products.length === 0 ? (
-        <p style={{ textAlign: "center", color: "#757575" }}>{t.noProducts}</p>
-      ) : (
-        <div style={styles.grid}>
-          {products.map(p => (
-            <ProductCard key={p._id} product={p} lang={lang} />
-          ))}
+    <div className="min-h-screen bg-orange-50/30 font-sans">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Hero Section */}
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl mb-16 bg-gradient-to-r from-orange-600 to-orange-400">
+          <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
+          <div className="relative px-8 py-20 md:py-32 text-center flex flex-col items-center justify-center">
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-md tracking-tight">
+              {t.appName || "Shree Sanatan Traders"}
+            </h1>
+            <p className="text-lg md:text-2xl text-orange-50 font-medium mb-10 max-w-2xl drop-shadow">
+              {t.tagline || "Discover Premium Quality Spiritual and Traditional Products"}
+            </p>
+            <Link
+              to="/products"
+              className="px-8 py-4 bg-white text-orange-600 font-bold rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 hover:bg-orange-50 transition-all duration-300 text-lg"
+            >
+              Shop Now
+            </Link>
+          </div>
         </div>
-      )}
+
+        {/* Featured Products Section */}
+        <div className="mb-12 flex items-center justify-between">
+          <h2 className="text-3xl font-bold text-gray-900 border-l-4 border-orange-500 pl-4">
+            {t.products || "Featured Products"}
+          </h2>
+          <Link
+            to="/products"
+            className="text-orange-600 font-semibold hover:text-orange-700 transition"
+          >
+            View All &rarr;
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-orange-500 border-opacity-75"></div>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center bg-white p-12 rounded-2xl shadow-sm border border-orange-100">
+            <p className="text-gray-500 text-lg">{t.noProducts || "No products found."}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            {products.slice(0, 8).map((p) => (
+              <ProductCard key={p._id} product={p} lang={lang} />
+            ))}
+          </div>
+        )}
+      </main>
     </div>
   );
-};
-
-const styles = {
-  hero: {
-    background: "linear-gradient(135deg, #2E7D32, #4CAF50)",
-    color: "#fff", borderRadius: 16,
-    padding: "40px 32px", marginBottom: 32, textAlign: "center",
-  },
-  heroTitle:    { fontSize: 32, fontWeight: 700, marginBottom: 8 },
-  heroSub:      { fontSize: 18, opacity: 0.9 },
-  sectionTitle: { fontSize: 22, fontWeight: 600, color: "#2E7D32", marginBottom: 20 },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-    gap: 20,
-  },
 };
 
 export default Home;

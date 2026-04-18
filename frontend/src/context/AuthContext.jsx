@@ -3,12 +3,14 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser]   = useState(null);
+  const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
 
   useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) setUser(JSON.parse(stored));
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
   }, []);
 
   const login = (userData, authToken) => {
@@ -32,4 +34,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// ✅ Custom hook
 export const useAuth = () => useContext(AuthContext);
