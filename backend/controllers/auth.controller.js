@@ -54,16 +54,19 @@ exports.register = async (req, res) => {
 
 // 🔐 LOGIN (🔥 THIS WAS MISSING)
 exports.login = async (req, res) => {
+  console.log("📥 Login Request Body:", req.body);
   try {
-    const { email, password } = req.body;
+    const { email, phone, password } = req.body;
+    const identifier = email || phone;
 
-    // ✅ validation
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+    if (!identifier || !password) {
+      console.log("⚠️ Validation Failed");
+      return res.status(400).json({ message: "Email/Phone and password required" });
     }
 
-    // ✅ check user
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      $or: [{ email: identifier }, { phone: identifier }]
+    });
     if (!user) {
       return res.status(400).json({ message: "User not found" });
     }
@@ -71,22 +74,21 @@ exports.login = async (req, res) => {
     // ✅ compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      console.log(`❌ Invalid password for ${identifier}`);
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // ✅ token
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
-    res.json({
-      user,
-      token
-    });
+    console.log(`✅ Login success for ${identifier}`);
+    res.json({ user, token });
 
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("🔥 Server Error during login:", err);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

@@ -78,7 +78,7 @@ const OrderDetails = ({ lang = "en" }) => {
                 <div key={idx} className="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <div className="flex items-center space-x-4">
                     <div className="w-16 h-16 bg-white rounded-lg border border-gray-200 overflow-hidden shrink-0">
-                      {item.product?.image?.[0] ? <img src={item.product.image[0]} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">📦</div>}
+                      {item.product?.images?.[0] ? <img src={item.product.images[0]} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">📦</div>}
                     </div>
                     <div>
                       <p className="font-bold text-gray-900">{item.name || item.product?.name || "Item"}</p>

@@ -15,7 +15,7 @@ export const translations = {
     search: "Search premium products...",
     saleText: "Spring Season Sale 🌾",
     freeShipping: "Free Shipping on orders over ₹500!",
-    
+
     // Hero & Home
     heroTitle: "Premium Agricultural",
     heroSubtitle: "& Traditional Supplies",
@@ -29,7 +29,7 @@ export const translations = {
     expertTitle: "Need spiritual guidance or bulk support?",
     expertDesc: "Our team consists of agricultural experts and traditional artisans ready to help you choose the right essentials for your needs.",
     talkExpert: "Talk to our Experts",
-    
+
     // Product
     addToCart: "Add to Cart",
     added: "Added!",
@@ -41,7 +41,7 @@ export const translations = {
     noProducts: "No products found.",
     trending: "Trending",
     featured: "Featured",
-    
+
     // Profile & Auth
     personalInfo: "Personal Information",
     fullName: "Full Name",
@@ -52,7 +52,7 @@ export const translations = {
     welcome: "Welcome back!",
     customerType: "Valued Customer",
     adminType: "Administrator Account",
-    
+
     // Account / Orders
     orderHistory: "Order History",
     noOrders: "No orders found.",
@@ -63,7 +63,7 @@ export const translations = {
     itemsPurchased: "Items Purchased",
     deliveredTo: "Delivered To",
     viewDetails: "View Details",
-    
+
     // Cart & Checkout
     yourCart: "Your Shopping Cart",
     emptyCart: "Your cart feels a bit empty.",
@@ -75,17 +75,64 @@ export const translations = {
     checkout: "Proceed to Checkout",
     address: "Shipping Address",
     confirmPay: "Confirm & Pay",
-    
+
     // Footer
     quickLinks: "Quick Links",
     support: "Support",
     aboutUs: "About us",
     copyright: "© 2026 Shree Sanatan Traders. All rights reserved.",
-    
+
     // Common
     loading: "Loading...",
     error: "Error",
     success: "Success",
+    next: "Next",
+    back: "Back",
+    complete: "Complete",
+    skip: "Skip for now",
+
+    // Profile Wizard
+    stepTitle: "Step {current} of {total}",
+    onboardingTitle: "Set up your profile",
+    onboardingDesc: "Help us customize your experience for better results.",
+    selectLanguage: "Select Language",
+    userTypePrompt: "Who are you?",
+    farmerRole: "I am a Farmer",
+    farmerDesc: "I grow crops and need equipment.",
+    dealerRole: "I am a Dealer",
+    dealerDesc: "I sell seeds, tools or machinery.",
+    locationTitle: "Your Location",
+    detectLocation: "Auto-detect Location",
+    manualLocation: "Enter Pincode Manually",
+    pincode: "Pincode",
+    district: "District",
+    state: "State",
+
+    // Farmer Details
+    farmerInfo: "Farming Details",
+    landSize: "Land Size (Acres)",
+    selectCrops: "Which crops do you grow?",
+    irrigationType: "Irrigation Type",
+    irrigationRain: "Rain-fed",
+    irrigationCanal: "Canal",
+    irrigationBorewell: "Borewell/Well",
+    cropWheat: "Wheat",
+    cropRice: "Rice",
+    cropSugarcane: "Sugarcane",
+    cropCotton: "Cotton",
+    cropMaize: "Maize",
+    cropMustard: "Mustard",
+    myCrops: "My Crops",
+    farmAddress: "Farm Address",
+
+    // Dealer Details
+    dealerInfo: "Business Details",
+    shopName: "Shop / Business Name",
+    businessType: "Business Type",
+    businessSeeds: "Seeds & Fertilizers",
+    businessTools: "Hand Tools",
+    businessMachinery: "Tractors & Machinery",
+    businessRepair: "Repair & Service",
   },
   hi: {
     // Navbar & Layout
@@ -103,7 +150,7 @@ export const translations = {
     search: "प्रीमियम उत्पाद खोजें...",
     saleText: "वसंत ऋतु की सेल 🌾",
     freeShipping: "₹500 से अधिक के ऑर्डर पर मुफ्त शिपिंग!",
-    
+
     // Hero & Home
     heroTitle: "प्रीमियम कृषि",
     heroSubtitle: "& पारंपरिक सामग्री",
@@ -117,7 +164,7 @@ export const translations = {
     expertTitle: "आध्यात्मिक मार्गदर्शन या थोक ऑर्डर की सहायता चाहिए?",
     expertDesc: "हमारी टीम में कृषि विशेषज्ञ और पारंपरिक कलाकार शामिल हैं जो आपकी आवश्यकताओं के लिए सही सामग्री चुनने में आपकी सहायता के लिए तैयार हैं।",
     talkExpert: "हमारे विशेषज्ञों से बात करें",
-    
+
     // Product
     addToCart: "कार्ट में जोड़ें",
     added: "जुड़ गया!",
@@ -129,7 +176,7 @@ export const translations = {
     noProducts: "कोई उत्पाद नहीं मिला।",
     trending: "ट्रेंडिंग",
     featured: "खास",
-    
+
     // Profile & Auth
     personalInfo: "व्यक्तिगत जानकारी",
     fullName: "पूरा नाम",
@@ -140,7 +187,7 @@ export const translations = {
     welcome: "आपका स्वागत है!",
     customerType: "मूल्यवान ग्राहक",
     adminType: "प्रशासक खाता",
-    
+
     // Account / Orders
     orderHistory: "ऑर्डर का इतिहास",
     noOrders: "कोई ऑर्डर नहीं मिला।",
@@ -151,7 +198,7 @@ export const translations = {
     itemsPurchased: "खरीदे गए आइटम",
     deliveredTo: "यहाँ डिलीवर होगा",
     viewDetails: "विवरण देखें",
-    
+
     // Cart & Checkout
     yourCart: "आपकी खरीदारी कार्ट",
     emptyCart: "आपकी कार्ट थोड़ी खाली लग रही है।",
@@ -163,16 +210,63 @@ export const translations = {
     checkout: "चेकआउट के लिए आगे बढ़ें",
     address: "शिपिंग पता",
     confirmPay: "पुष्टि करें और भुगतान करें",
-    
+
     // Footer
     quickLinks: "त्वरित लिंक",
     support: "सहायता",
     aboutUs: "हमारे बारे में",
     copyright: "© 2026 श्री सनातन ट्रेडर्स। सर्वाधिकार सुरक्षित।",
-    
+
     // Common
     loading: "लोड हो रहा है...",
     error: "त्रुटि",
     success: "सफलता",
+    next: "अगला",
+    back: "पीछे",
+    complete: "पूर्ण",
+    skip: "अभी के लिए छोड़ें",
+
+    // Profile Wizard
+    stepTitle: "चरण {current} का {total}",
+    onboardingTitle: "अपनी प्रोफाइल सेट करें",
+    onboardingDesc: "बेहतर परिणामों के लिए अपनी प्रोफ़ाइल पूरी करें।",
+    selectLanguage: "भाषा चुनें",
+    userTypePrompt: "आप कौन हैं?",
+    farmerRole: "मैं एक किसान हूँ",
+    farmerDesc: "मैं फसल उगाता हूँ और उपकरणों की आवश्यकता है।",
+    dealerRole: "मैं एक डीलर हूँ",
+    dealerDesc: "मैं बीज, उपकरण या मशीनरी बेचता हूँ।",
+    locationTitle: "आपका स्थान",
+    detectLocation: "स्वचालित स्थान खोजें",
+    manualLocation: "पिनकोड मैन्युअल रूप से दर्ज करें",
+    pincode: "पिनकोड",
+    district: "जिला",
+    state: "राज्य",
+
+    // Farmer Details
+    farmerInfo: "खेती का विवरण",
+    landSize: "भूमि का आकार (एकड़)",
+    selectCrops: "आप कौन सी फसलें उगाते हैं?",
+    irrigationType: "सिंचाई का प्रकार",
+    irrigationRain: "वर्षा आधारित",
+    irrigationCanal: "नहर",
+    irrigationBorewell: "बोरवेल/कुआं",
+    cropWheat: "गेहूं",
+    cropRice: "चावल",
+    cropSugarcane: "गन्ना",
+    cropCotton: "कपास",
+    cropMaize: "मक्का",
+    cropMustard: "सरसों",
+    myCrops: "मेरी फसलें",
+    farmAddress: "फार्म का पता",
+
+    // Dealer Details
+    dealerInfo: "व्यापार विवरण",
+    shopName: "दुकान / व्यवसाय का नाम",
+    businessType: "व्यापार का प्रकार",
+    businessSeeds: "बीज और उर्वरक",
+    businessTools: "हाथ के औजार",
+    businessMachinery: "ट्रैक्टर और मशीनरी",
+    businessRepair: "मरम्मत और सेवा",
   },
-};
+};

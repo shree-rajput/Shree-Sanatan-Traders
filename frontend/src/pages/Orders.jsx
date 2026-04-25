@@ -85,7 +85,7 @@ const Orders = ({ lang = "en" }) => {
                     {o.items?.slice(0, 3).map((item, idx) => (
                       <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 flex items-center space-x-3">
                         <div className="w-8 h-8 rounded bg-gray-200 flex items-center justify-center overflow-hidden shrink-0">
-                           {item.product?.image?.[0] ? <img src={item.product.image[0]} className="w-full h-full object-cover" alt="" /> : <span className="text-[10px]">📦</span>}
+                           {item.product?.images?.[0] ? <img src={item.product.images[0]} className="w-full h-full object-cover" alt="" /> : <span className="text-[10px]">📦</span>}
                         </div>
                         <div className="text-sm">
                           <p className="font-medium text-gray-900 truncate max-w-[120px]">{item.name || item.product?.name || "Product"}</p>

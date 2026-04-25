@@ -88,7 +88,7 @@ const Cart = ({ lang = "en" }) => {
 
                   <div className="w-24 h-24 shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center p-2">
                     <img
-                      src={item.image?.[0] || item.product?.image?.[0] || "/box1.png"}
+                      src={item.images?.[0] || item.product?.images?.[0] || "/box1.png"}
                       alt={item.name || item.product?.name || "Product Image"}
                       className="w-full h-full object-contain"
                     />

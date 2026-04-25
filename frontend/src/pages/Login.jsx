@@ -22,7 +22,10 @@ const Login = ({ lang = "en" }) => {
     setIsLoading(true);
     
     try {
+      console.log("🚀 Sending Login Payload:", { email, password });
       const res = await API.post("/auth/login", { email, password });
+      console.log("📥 Login Response:", res.data);
+      
       login(res.data.user, res.data.token);
       toast.success(lang === 'en' ? "Welcome back to Shree Sanatan!" : "श्री सनातन में आपका स्वागत है!");
       const from = location.state?.from?.pathname || "/";

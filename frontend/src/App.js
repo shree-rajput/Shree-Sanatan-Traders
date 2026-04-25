@@ -85,7 +85,7 @@ function App() {
                     <ProtectedRoute><OrderDetails lang={lang} /></ProtectedRoute>
                   } />
                   <Route path="/profile" element={
-                    <ProtectedRoute><Profile lang={lang} /></ProtectedRoute>
+                    <ProtectedRoute><Profile lang={lang} setLang={setLang} /></ProtectedRoute>
                   } />
 
                   {/* 🛠️ PROTECTED ADMIN ROUTES */}
