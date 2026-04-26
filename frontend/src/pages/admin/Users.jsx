@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AdminSidebar from "../../components/AdminSidebar";
+
 import API from "../../services/api";
 
 const AdminUsers = () => {
@@ -24,14 +24,13 @@ const AdminUsers = () => {
   }, []);
 
   return (
-    <AdminSidebar>
-      <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
         <h1 className="text-3xl font-black text-gray-900 mb-8 tracking-tight">Registered Users</h1>
         
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-orange-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-emerald-600"></div>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -47,7 +46,7 @@ const AdminUsers = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-sm">
                   {users.map((user) => (
-                    <tr key={user._id} className="hover:bg-orange-50/50 transition-colors">
+                    <tr key={user._id} className="hover:bg-emerald-50/50 transition-colors">
                       <td className="p-4 pl-6 font-mono text-xs text-gray-500">{user._id}</td>
                       <td className="p-4 font-bold text-gray-900">{user.name}</td>
                       <td className="p-4 text-gray-600">{user.email}</td>
@@ -72,7 +71,7 @@ const AdminUsers = () => {
           )}
         </div>
       </div>
-    </AdminSidebar>
+
   );
 };
 

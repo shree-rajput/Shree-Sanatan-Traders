@@ -1,21 +1,17 @@
 import React from "react";
+import { LuLanguages, LuChevronDown } from "react-icons/lu";
 
 const LanguageToggle = ({ lang, setLang }) => (
-  <div className="flex gap-1 bg-white/10 backdrop-blur-md rounded-full p-1 border border-white/20 shadow-inner">
-    {["en", "hi"].map(l => (
-      <button
-        key={l}
-        onClick={() => setLang(l)}
-        className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all duration-300 ${
-          lang === l 
-            ? "bg-emerald-500 text-white shadow-sm" 
-            : "text-emerald-100 hover:text-white"
-        }`}
-      >
-        {l === "en" ? "ENG" : "हिन्दी"}
-      </button>
-    ))}
-  </div>
+  <button 
+    onClick={() => setLang(lang === "en" ? "hi" : "en")}
+    className="flex items-center gap-1.5 hover:text-green-200 transition-colors group"
+  >
+    <LuLanguages size={14} className="text-green-400 group-hover:text-green-200" />
+    <span className="text-[13px] font-bold tracking-tight">
+      {lang === "en" ? "English" : "हिन्दी"}
+    </span>
+    <LuChevronDown size={14} className="opacity-50" />
+  </button>
 );
 
-export default LanguageToggle;
+export default LanguageToggle;

@@ -2,10 +2,18 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../services/api";
 import { useCart } from "../context/CartContext";
-import { translations } from "../utils/translations";
+import { 
+  LuTrash2, 
+  LuPlus, 
+  LuMinus, 
+  LuShoppingBag, 
+  LuChevronRight, 
+  LuShieldCheck, 
+  LuTruck,
+  LuLoaderCircle
+} from "react-icons/lu";
 
-const Cart = ({ lang = "en" }) => {
-  const t = translations[lang] || translations["en"];
+const Cart = () => {
   const { cartItems, removeFromCart, updateQty, clearCart, totalItems, totalPrice } = useCart();
   const [address, setAddress] = useState("");
   const [placingOrder, setPlacingOrder] = useState(false);
@@ -14,7 +22,7 @@ const Cart = ({ lang = "en" }) => {
 
   const handleCheckout = async () => {
     if (!address.trim()) {
-      setError(lang === 'en' ? "Please provide a shipping address." : "कृपया शिपिंग पता प्रदान करें।");
+      setError("Please provide a shipping address.");
       return;
     }
 
@@ -23,7 +31,6 @@ const Cart = ({ lang = "en" }) => {
 
     try {
       const token = localStorage.getItem("token");
-
       const orderPayload = {
         shippingAddress: address,
         items: cartItems.map(item => ({
@@ -34,143 +41,175 @@ const Cart = ({ lang = "en" }) => {
         totalAmount: totalPrice
       };
 
-      await API.post(
-        "/orders",
-        orderPayload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await API.post("/orders", orderPayload, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
 
       clearCart();
       navigate("/orders");
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.message || (lang === 'en' ? "Failed to place order." : "ऑर्डर देने में विफल।"));
+      setError(err.response?.data?.message || "Failed to place order.");
       setPlacingOrder(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans py-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-8 tracking-tight">{t.yourCart}</h1>
+    <div className="min-h-screen bg-[#fcfdfd] py-12 md:py-20 px-4 md:px-10">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <div className="mb-10">
+           <h1 className="text-3xl font-black text-gray-900 tracking-tight">Shopping <span className="text-emerald-600">Cart</span></h1>
+           <p className="text-gray-500 font-medium mt-1">Review your items before secure checkout</p>
+        </div>
 
         {cartItems.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-16 text-center">
-            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-emerald-50 mb-6">
-              <svg className="w-12 h-12 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">{t.emptyCart}</h2>
-            <p className="text-gray-500 mb-8 max-w-md mx-auto">Looks like you haven't added any premium traditional products to your cart yet.</p>
-            <Link
+          <div className="bg-white rounded-[40px] p-20 text-center border border-dashed border-gray-200">
+             <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <LuShoppingBag size={40} className="text-gray-300" />
+             </div>
+             <h2 className="text-2xl font-black text-gray-900 mb-2">Your cart is empty</h2>
+             <p className="text-gray-500 font-medium max-w-sm mx-auto mb-8">
+               Looks like you haven't added anything yet. Explore our premium equipment to get started.
+             </p>
+             <Link 
               to="/products"
-              className="inline-block bg-emerald-600 text-white font-bold px-8 py-3.5 rounded-full hover:bg-emerald-700 transition shadow-md hover:shadow-lg"
-            >
-              {t.startShopping}
-            </Link>
+              className="inline-flex items-center gap-2 px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-100 hover:scale-105 transition-all"
+             >
+               Browse Shop <LuChevronRight size={18} />
+             </Link>
           </div>
         ) : (
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Cart Items List */}
-            <div className="lg:w-2/3 space-y-4">
+          <div className="flex flex-col lg:flex-row gap-12">
+            
+            {/* Cart Items */}
+            <div className="flex-1 space-y-6">
               {cartItems.map((item) => (
-                <div key={item._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 flex flex-col sm:flex-row items-center gap-6 relative group border-l-4 border-transparent hover:border-emerald-500 transition-colors">
-
-                  {/* Remove Button */}
-                  <button
-                    onClick={() => removeFromCart(item._id)}
-                    className="absolute top-4 right-4 text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 p-2 rounded-full transition-colors"
-                    title="Remove item"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                  </button>
-
-                  <div className="w-24 h-24 shrink-0 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex items-center justify-center p-2">
-                    <img
-                      src={item.images?.[0] || item.product?.images?.[0] || "/box1.png"}
-                      alt={item.name || item.product?.name || "Product Image"}
-                      className="w-full h-full object-contain"
+                <div key={item._id} className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm flex items-center gap-6 group transition-all hover:shadow-lg hover:border-emerald-50">
+                  
+                  {/* Image */}
+                  <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-50 rounded-2xl overflow-hidden p-4 shrink-0">
+                    <img 
+                      src={item.images?.[0] || "/box1.png"} 
+                      alt={item.name} 
+                      className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500" 
                     />
                   </div>
 
-                  <div className="flex-1 flex flex-col sm:flex-row justify-between w-full">
+                  {/* Info */}
+                  <div className="flex-1 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 max-w-[200px] sm:max-w-xs">{item.name || item.product?.name || "Premium Item"}</h3>
-                      <p className="text-sm text-gray-400 mt-1 uppercase font-semibold tracking-wider">{t.unit}: {item.unit || "N/A"}</p>
+                       <h3 className="text-lg font-black text-gray-900 mb-1 leading-tight">{item.name}</h3>
+                       <p className="text-xs font-black text-emerald-600 uppercase tracking-widest">{item.category || "General"}</p>
+                       <p className="text-sm font-bold text-gray-400 mt-2">Unit: {item.unit || "1 Pc"}</p>
                     </div>
 
-                    <div className="mt-4 sm:mt-0 flex flex-col items-end">
-                      <p className="text-lg font-black text-emerald-700 mb-2">₹{(item.price || item.product?.price || 0) * (item.qty || 1)}</p>
-
-                      {/* Quantity Controller */}
-                      <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden bg-gray-50 shadow-sm">
-                        <button
-                          onClick={() => updateQty(item._id, (item.qty || 1) - 1)}
-                          className="px-3 py-1 text-gray-500 hover:bg-gray-200 hover:text-black font-bold transition"
-                        >−</button>
-                        <span className="px-3 text-sm font-bold text-gray-800">{item.qty || 1}</span>
-                        <button
-                          onClick={() => updateQty(item._id, (item.qty || 1) + 1)}
-                          className="px-3 py-1 text-gray-500 hover:bg-gray-200 hover:text-black font-bold transition"
-                        >+</button>
-                      </div>
-
+                    <div className="flex flex-col md:items-end gap-4">
+                       <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-2xl">
+                          <button 
+                            onClick={() => updateQty(item._id, (item.qty || 1) - 1)}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-emerald-600 hover:bg-white rounded-xl transition-all"
+                          >
+                            <LuMinus size={16} />
+                          </button>
+                          <span className="text-sm font-black text-gray-900 w-4 text-center">{item.qty || 1}</span>
+                          <button 
+                            onClick={() => updateQty(item._id, (item.qty || 1) + 1)}
+                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-emerald-600 hover:bg-white rounded-xl transition-all"
+                          >
+                            <LuPlus size={16} />
+                          </button>
+                       </div>
+                       <p className="text-xl font-black text-gray-900 tracking-tight">₹{(item.price * (item.qty || 1)).toLocaleString()}</p>
                     </div>
                   </div>
+
+                  {/* Delete */}
+                  <button 
+                    onClick={() => removeFromCart(item._id)}
+                    className="p-3 text-red-300 hover:text-red-600 hover:bg-red-50 rounded-2xl transition-all"
+                  >
+                    <LuTrash2 size={22} />
+                  </button>
                 </div>
               ))}
-            </div>
 
-            {/* Order Summary Pane */}
-            <div className="lg:w-1/3">
-              <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6 sm:p-8 sticky top-24">
-                <h2 className="text-xl font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4">{t.checkout}</h2>
-
-                <div className="space-y-4 mb-6">
-                  <div className="flex justify-between text-gray-600">
-                    <span>{t.subtotal} ({totalItems} items)</span>
-                    <span className="font-semibold text-gray-900">₹{totalPrice}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>{t.shipping}</span>
-                    <span className="text-green-600 font-semibold">{lang === 'en' ? 'Calculated Next' : 'अगले चरण में'}</span>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-4 mb-8">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold text-gray-900">{t.total}</span>
-                    <span className="text-2xl font-black text-emerald-700">₹{totalPrice}</span>
-                  </div>
-                </div>
-
-                {error && (
-                  <div className="mb-4 bg-red-50 border-l-4 border-red-500 p-3 text-red-700 text-sm rounded shadow-sm">
-                    {error}
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">{t.address}</label>
-                  <textarea
-                    rows="3"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition resize-none placeholder-gray-400"
-                    placeholder={lang === 'en' ? "Enter your full delivery address..." : "अपना पूरा डिलीवरी पता दर्ज करें..."}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                  ></textarea>
-                </div>
-
-                <button
-                  onClick={handleCheckout}
-                  disabled={placingOrder}
-                  className="w-full bg-emerald-600 text-white font-bold py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-emerald-700 hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {placingOrder ? t.loading : t.confirmPay}
-                </button>
+              <div className="flex justify-between items-center pt-6">
+                 <Link to="/products" className="flex items-center gap-2 text-sm font-black text-gray-400 hover:text-emerald-600 transition-colors uppercase tracking-widest">
+                    <LuChevronRight className="rotate-180" size={16} /> Continue Shopping
+                 </Link>
+                 <button 
+                  onClick={clearCart}
+                  className="text-sm font-black text-red-400 hover:text-red-600 transition-colors uppercase tracking-widest"
+                 >
+                   Clear Cart
+                 </button>
               </div>
             </div>
+
+            {/* Summary */}
+            <aside className="w-full lg:w-[400px] space-y-8">
+               <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-xl shadow-emerald-900/5 sticky top-32">
+                  <h3 className="text-xl font-black text-gray-900 mb-8 pb-6 border-b border-gray-50">Order Summary</h3>
+                  
+                  <div className="space-y-4 mb-10">
+                     <div className="flex justify-between text-sm font-bold text-gray-500">
+                        <span>Subtotal ({totalItems} items)</span>
+                        <span className="text-gray-900">₹{totalPrice.toLocaleString()}</span>
+                     </div>
+                     <div className="flex justify-between text-sm font-bold text-gray-500">
+                        <span>Shipping</span>
+                        <span className="text-emerald-600">Calculated Next</span>
+                     </div>
+                     <div className="h-px bg-gray-50 my-4"></div>
+                     <div className="flex justify-between items-center">
+                        <span className="text-lg font-black text-gray-900">Total Price</span>
+                        <span className="text-3xl font-black text-emerald-600 tracking-tight">₹{totalPrice.toLocaleString()}</span>
+                     </div>
+                  </div>
+
+                  <div className="space-y-6">
+                     <div className="space-y-3">
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Delivery Address</label>
+                        <textarea 
+                           rows="3"
+                           className={`w-full px-5 py-4 bg-gray-50 rounded-2xl border border-transparent focus:bg-white focus:border-emerald-200 focus:ring-4 focus:ring-emerald-500/5 transition-all text-sm font-bold outline-none resize-none ${error ? 'border-red-200 bg-red-50' : ''}`}
+                           placeholder="Enter full village address..."
+                           value={address}
+                           onChange={(e) => setAddress(e.target.value)}
+                        />
+                        {error && <p className="text-[10px] font-bold text-red-500 ml-1 tracking-tight">{error}</p>}
+                     </div>
+
+                     <button 
+                        onClick={handleCheckout}
+                        disabled={placingOrder}
+                        className="w-full py-5 bg-emerald-600 text-white rounded-[24px] font-black shadow-2xl shadow-emerald-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+                     >
+                        {placingOrder ? (
+                           <>
+                              <LuLoaderCircle className="animate-spin" size={24} />
+                              Placing Order...
+                           </>
+                        ) : (
+                           <>
+                              Proceed to Checkout <LuChevronRight size={20} />
+                           </>
+                        )}
+                     </button>
+                  </div>
+
+                  <div className="mt-10 grid grid-cols-2 gap-4">
+                     <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        <LuShieldCheck className="text-emerald-500" size={16} /> Secure Payment
+                     </div>
+                     <div className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        <LuTruck className="text-emerald-500" size={16} /> Quick Delivery
+                     </div>
+                  </div>
+               </div>
+            </aside>
+
           </div>
         )}
       </div>
@@ -179,4 +218,3 @@ const Cart = ({ lang = "en" }) => {
 };
 
 export default Cart;
-

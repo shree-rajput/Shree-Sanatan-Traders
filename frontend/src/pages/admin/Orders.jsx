@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import AdminSidebar from "../../components/AdminSidebar";
+
 import API from "../../services/api";
 
 const AdminOrders = () => {
@@ -40,14 +40,13 @@ const AdminOrders = () => {
   };
 
   return (
-    <AdminSidebar>
-      <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
         <h1 className="text-3xl font-black text-gray-900 mb-8 tracking-tight">Manage Orders</h1>
         
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           {loading ? (
              <div className="flex justify-center items-center h-64">
-               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-orange-500"></div>
+               <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-emerald-500"></div>
              </div>
           ) : (
              <div className="overflow-x-auto">
@@ -63,10 +62,10 @@ const AdminOrders = () => {
                  </thead>
                  <tbody className="divide-y divide-gray-100 text-sm">
                    {orders.map((order) => (
-                     <tr key={order._id} className="hover:bg-orange-50/50 transition-colors">
+                     <tr key={order._id} className="hover:bg-emerald-50/50 transition-colors">
                        <td className="p-4 pl-6 font-mono text-xs text-gray-500">{order._id}</td>
                        <td className="p-4 font-bold text-gray-900">{order.user?.name || "Unknown"}</td>
-                       <td className="p-4 font-black text-orange-600 border-l border-r border-transparent">₹{order.totalPrice}</td>
+                       <td className="p-4 font-black text-emerald-600 border-l border-r border-transparent">₹{order.totalPrice}</td>
                        <td className="p-4 text-center">
                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                             order.paymentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
@@ -79,7 +78,7 @@ const AdminOrders = () => {
                          <select
                            value={order.orderStatus || "Processing"}
                            onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                           className="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2.5 font-semibold shadow-sm outline-none cursor-pointer"
+                           className="w-full bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block p-2.5 font-semibold shadow-sm outline-none cursor-pointer"
                          >
                            <option value="Processing">Processing</option>
                            <option value="Shipped">Shipped</option>
@@ -100,7 +99,7 @@ const AdminOrders = () => {
           )}
         </div>
       </div>
-    </AdminSidebar>
+
   );
 };
 

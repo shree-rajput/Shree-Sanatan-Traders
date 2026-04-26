@@ -3,26 +3,24 @@ import { useSearchParams } from "react-router-dom";
 import API from "../services/api";
 import ProductCard from "../components/ProductCard";
 import ProductSkeleton from "../components/ui/ProductSkeleton";
-import { translations } from "../utils/translations";
+import useDebounce from "../hooks/useDebounce";
+import { LuSearch, LuFilter, LuSlidersHorizontal, LuChevronRight, LuX } from "react-icons/lu";
+
+const CATEGORIES = ["Trailers", "Irrigation", "Pumps", "Tools", "Seeds", "Fertilizers", "Spare Parts"];
 
 const Products = ({ lang = "en" }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // URL & Filtering State
-  const [searchParams] = useSearchParams();
-  const urlSearchTrigger = searchParams.get("search") || "";
-  
-  const [localSearch, setLocalSearch] = useState(urlSearchTrigger);
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [sortOrder, setSortOrder] = useState(""); // "low-high", "high-low"
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  const t = translations[lang] || translations["en"];
+  // Filters State
+  const [localSearch, setLocalSearch] = useState(searchParams.get("search") || "");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "All");
+  const [priceRange, setPriceRange] = useState(100000);
+  const [sortOrder, setSortOrder] = useState("newest");
+  const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Sync URL search params to local input if users use the distinct Navbar search
-  useEffect(() => {
-    setLocalSearch(urlSearchTrigger);
-  }, [urlSearchTrigger]);
+  const debouncedSearch = useDebounce(localSearch, 500);
 
   useEffect(() => {
     API.get("/products")
@@ -31,125 +29,245 @@ const Products = ({ lang = "en" }) => {
       .finally(() => setLoading(false));
   }, []);
 
-  // Compute Categories dynamically from fetched products
-  const categories = useMemo(() => {
-    const cats = new Set(products.map(p => p.category).filter(Boolean));
-    return ["All", ...Array.from(cats)];
-  }, [products]);
+  // Update URL when filters change
+  useEffect(() => {
+    const params = {};
+    if (debouncedSearch) params.search = debouncedSearch;
+    if (selectedCategory !== "All") params.category = selectedCategory;
+    setSearchParams(params);
+  }, [debouncedSearch, selectedCategory, setSearchParams]);
 
-  // Derived State Engine: Filter & Sort on the fly (Kisanshop-level UX response)
+  // Derive Filtered Products
   const filteredProducts = useMemo(() => {
-    let result = [...products];
+    let result = products.filter(p => {
+      const matchesSearch = 
+        p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+        p.description?.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        p.category?.toLowerCase().includes(debouncedSearch.toLowerCase());
+      
+      const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
+      
+      const productPrice = p.variants?.[0]?.price || p.price || 0;
+      const matchesPrice = productPrice <= priceRange;
 
-    if (localSearch) {
-      result = result.filter(p => p.name.toLowerCase().includes(localSearch.toLowerCase()));
-    }
+      return matchesSearch && matchesCategory && matchesPrice;
+    });
 
-    if (selectedCategory && selectedCategory !== "All") {
-      result = result.filter(p => p.category === selectedCategory);
-    }
-
-    if (sortOrder === "low-high") {
-      result.sort((a, b) => {
-          const priceA = a.variants?.[0]?.price || a.price || 0;
-          const priceB = b.variants?.[0]?.price || b.price || 0;
-          return priceA - priceB;
-      });
-    } else if (sortOrder === "high-low") {
-      result.sort((a, b) => {
-          const priceA = a.variants?.[0]?.price || a.price || 0;
-          const priceB = b.variants?.[0]?.price || b.price || 0;
-          return priceB - priceA;
-      });
+    if (sortOrder === "price-low") {
+      result.sort((a, b) => (a.price || 0) - (b.price || 0));
+    } else if (sortOrder === "price-high") {
+      result.sort((a, b) => (b.price || 0) - (a.price || 0));
     }
 
     return result;
-  }, [products, localSearch, selectedCategory, sortOrder]);
+  }, [products, debouncedSearch, selectedCategory, priceRange, sortOrder]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
-      {/* Header Banner */}
-      <div className="bg-emerald-600 border-b border-emerald-700 shadow-sm relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 text-center relative z-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">
-            {t.exploreShop}
-          </h1>
-          <p className="mt-4 text-lg text-emerald-100 max-w-2xl mx-auto">
-            {t.tagline}
-          </p>
+    <div className="min-h-screen bg-[#fcfdfd]">
+      
+      {/* 🏙️ BREADCRUMB / HEADER */}
+      <div className="bg-white border-b border-gray-100 py-10">
+        <div className="max-w-[1440px] mx-auto px-4 md:px-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-3">
+              <span className="opacity-50">Home</span>
+              <LuChevronRight size={10} />
+              <span>Explore Products</span>
+            </div>
+            <h1 className="text-4xl font-black text-gray-900 tracking-tight">
+               Agricultural <span className="text-emerald-600">Equipment</span>
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-3">
+             <div className="bg-emerald-50 px-6 py-3 rounded-2xl flex items-center gap-4">
+                <div className="flex flex-col">
+                   <span className="text-[10px] font-black text-emerald-700/60 uppercase tracking-widest leading-none mb-1">Total Items</span>
+                   <span className="text-xl font-black text-emerald-800 leading-none">{filteredProducts.length}</span>
+                </div>
+                <div className="w-px h-8 bg-emerald-200"></div>
+                <div className="flex flex-col">
+                   <span className="text-[10px] font-black text-emerald-700/60 uppercase tracking-widest leading-none mb-1">Showing</span>
+                   <span className="text-xl font-black text-emerald-800 leading-none">{selectedCategory}</span>
+                </div>
+             </div>
+          </div>
         </div>
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
-        
-        {/* Advanced Filtering Toolbar */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
-           <div className="relative flex-1 max-w-sm">
-             <input 
-               type="text" 
-               placeholder={t.search} 
-               value={localSearch}
-               onChange={(e) => setLocalSearch(e.target.value)}
-               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-             />
-             <svg className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-           </div>
-           
-           <div className="flex flex-col sm:flex-row items-center gap-4">
-             <select 
-               value={selectedCategory} 
-               onChange={(e)=>setSelectedCategory(e.target.value)}
-               className="w-full sm:w-auto border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-emerald-500 outline-none text-gray-700 bg-gray-50"
-             >
-               {categories.map(cat => <option key={cat} value={cat}>{cat === 'All' ? (lang === 'en' ? 'All Categories' : 'सभी श्रेणियां') : cat}</option>)}
-             </select>
-             
-             <select 
-               value={sortOrder} 
-               onChange={(e)=>setSortOrder(e.target.value)}
-               className="w-full sm:w-auto border border-gray-300 rounded-lg py-2 px-4 focus:ring-2 focus:ring-emerald-500 outline-none text-gray-700 bg-gray-50"
-             >
-               <option value="">{lang === 'en' ? 'Sort by Relevance' : 'प्रासंगिकता के आधार पर'}</option>
-               <option value="low-high">{lang === 'en' ? 'Price: Low to High' : 'कीमत: कम से ज्यादा'}</option>
-               <option value="high-low">{lang === 'en' ? 'Price: High to Low' : 'कीमत: ज्यादा से कम'}</option>
-             </select>
+      <div className="max-w-[1440px] mx-auto px-4 md:px-10 py-12">
+        <div className="flex flex-col lg:flex-row gap-12">
+          
+          {/* 🛠️ SIDEBAR FILTERS (Desktop) */}
+          <aside className="hidden lg:block w-72 shrink-0 space-y-10">
+            
+            {/* Search Box */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Search Products</h3>
+              <div className="relative group">
+                 <input 
+                   type="text"
+                   placeholder="Try 'Trailer' or 'Tools'..."
+                   value={localSearch}
+                   onChange={(e) => setLocalSearch(e.target.value)}
+                   className="w-full pl-12 pr-4 py-3.5 bg-white border border-gray-100 rounded-3xl text-sm font-medium focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-200 transition-all outline-none"
+                 />
+                 <LuSearch size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-600 transition-colors" />
+              </div>
+            </div>
+
+            {/* Categories */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Categories</h3>
+              <div className="flex flex-col gap-1">
+                <button 
+                  onClick={() => setSelectedCategory("All")}
+                  className={`w-full text-left px-5 py-3 rounded-2xl text-sm font-bold transition-all ${selectedCategory === "All" ? "bg-emerald-600 text-white shadow-xl shadow-emerald-100" : "text-gray-500 hover:bg-gray-100"}`}
+                >
+                  All Categories
+                </button>
+                {CATEGORIES.map(cat => (
+                  <button 
+                    key={cat}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`w-full text-left px-5 py-3 rounded-2xl text-sm font-bold transition-all ${selectedCategory === cat ? "bg-emerald-600 text-white shadow-xl shadow-emerald-100" : "text-gray-500 hover:bg-gray-100"}`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Price Filter */}
+            <div className="space-y-6">
+               <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest">Max Price: ₹{priceRange.toLocaleString()}</h3>
+               <input 
+                 type="range" 
+                 min="100" 
+                 max="200000" 
+                 step="500"
+                 value={priceRange}
+                 onChange={(e) => setPriceRange(Number(e.target.value))}
+                 className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+               />
+               <div className="flex justify-between text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                  <span>₹100</span>
+                  <span>₹2L+</span>
+               </div>
+            </div>
+
+          </aside>
+
+          {/* 📦 PRODUCT GRID */}
+          <div className="flex-1 space-y-8">
+            
+            {/* Toolbar */}
+            <div className="flex items-center justify-between bg-white p-3 rounded-3xl border border-gray-100 shadow-sm">
+               <button 
+                 onClick={() => setIsMobileFilterOpen(true)}
+                 className="lg:hidden flex items-center gap-2 px-5 py-2.5 bg-emerald-50 rounded-2xl text-emerald-700 text-sm font-black"
+               >
+                 <LuFilter size={18} /> Filters
+               </button>
+
+               <div className="hidden lg:flex items-center gap-4 px-4 text-sm font-bold text-gray-400">
+                  <LuSlidersHorizontal size={18} />
+                  <span>Showing {filteredProducts.length} Results</span>
+               </div>
+
+               <div className="flex items-center gap-3">
+                  <span className="hidden sm:inline text-xs font-black text-gray-400 uppercase tracking-widest">Sort By</span>
+                  <select 
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                    className="bg-gray-50 border-none rounded-2xl px-5 py-2.5 text-sm font-bold text-gray-700 focus:ring-2 focus:ring-emerald-500/10 cursor-pointer"
+                  >
+                    <option value="newest">Newest Arrivals</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                  </select>
+               </div>
+            </div>
+
+            {/* Grid */}
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                 {[...Array(6)].map((_, i) => <ProductSkeleton key={i} />)}
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="py-32 text-center bg-white rounded-[40px] border border-dashed border-gray-200">
+                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <LuSearch size={32} className="text-gray-300" />
+                 </div>
+                 <h2 className="text-2xl font-black text-gray-900 mb-2">No matches found</h2>
+                 <p className="text-gray-500 font-medium">Try adjusting your filters or search terms.</p>
+                 <button 
+                  onClick={() => { setLocalSearch(""); setSelectedCategory("All"); setPriceRange(200000); }}
+                  className="mt-8 px-8 py-3.5 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-100 hover:scale-105 transition-all"
+                 >
+                   Clear All Filters
+                 </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                {filteredProducts.map(p => (
+                  <ProductCard key={p._id} product={p} />
+                ))}
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+
+      {/* 📱 MOBILE FILTER DRAWER */}
+      {isMobileFilterOpen && (
+        <div className="fixed inset-0 z-[200] bg-black/50 backdrop-blur-sm lg:hidden">
+           <div className="absolute right-0 top-0 h-full w-full max-w-xs bg-white p-8 animate-in slide-in-from-right duration-500">
+              <div className="flex items-center justify-between mb-10">
+                 <h2 className="text-2xl font-black text-gray-900">Filters</h2>
+                 <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 bg-gray-100 rounded-full">
+                    <LuX size={20} />
+                 </button>
+              </div>
+
+              <div className="space-y-10 overflow-y-auto h-[calc(100%-80px)]">
+                 <div className="space-y-4">
+                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Search</h3>
+                    <input 
+                       type="text"
+                       placeholder="Search products..."
+                       value={localSearch}
+                       onChange={(e) => setLocalSearch(e.target.value)}
+                       className="w-full px-5 py-3.5 bg-gray-50 rounded-2xl text-sm font-medium border-none focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                 </div>
+
+                 <div className="space-y-4">
+                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-widest">Categories</h3>
+                    <div className="flex flex-wrap gap-2">
+                       {["All", ...CATEGORIES].map(cat => (
+                         <button 
+                           key={cat}
+                           onClick={() => setSelectedCategory(cat)}
+                           className={`px-4 py-2 rounded-xl text-xs font-bold border ${selectedCategory === cat ? "bg-emerald-600 border-emerald-600 text-white" : "bg-white border-gray-100 text-gray-500"}`}
+                         >
+                           {cat}
+                         </button>
+                       ))}
+                    </div>
+                 </div>
+
+                 <button 
+                  onClick={() => setIsMobileFilterOpen(false)}
+                  className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-100"
+                 >
+                   Apply Filters
+                 </button>
+              </div>
            </div>
         </div>
-
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {[...Array(8)].map((_, i) => (
-              <ProductSkeleton key={i} />
-            ))}
-          </div>
-        ) : filteredProducts.length === 0 ? (
-          <div className="text-center bg-white p-16 rounded-3xl shadow-sm border border-gray-200">
-            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-            </svg>
-            <h3 className="mt-2 text-sm font-semibold text-gray-900">{lang === 'en' ? 'No matches found' : 'कोई मिलान नहीं मिला'}</h3>
-            <p className="mt-1 text-sm text-gray-500">{lang === 'en' ? "We couldn't find anything matching your filters or search query." : "हमें आपके फिल्टर या खोज प्रश्न से मेल खाने वाला कुछ नहीं मिला।"}</p>
-            {(localSearch || selectedCategory !== "All") && (
-              <button 
-                onClick={() => { setLocalSearch(""); setSelectedCategory("All"); setSortOrder(""); }} 
-                className="mt-4 text-emerald-600 font-bold hover:underline"
-              >
-                {lang === 'en' ? 'Clear all filters' : 'सभी फिल्टर हटाएं'}
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="mb-4">
-            <p className="text-gray-500 text-sm mb-6 font-medium">{lang === 'en' ? 'Showing' : 'दिखा रहा है'} {filteredProducts.length} {lang === 'en' ? 'results' : 'परिणाम'}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {filteredProducts.map((p) => (
-                <ProductCard key={p._id} product={p} lang={lang} />
-              ))}
-            </div>
-          </div>
-        )}
-      </main>
+      )}
     </div>
   );
 };

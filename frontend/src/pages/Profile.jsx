@@ -1,36 +1,32 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User,
-  MapPin,
-  Package,
-  LogOut,
-  ChevronRight,
-  Loader2,
-  ArrowLeft,
-  MapPinned,
-  Truck,
-  CheckCircle2,
-  Edit2,
-  X
-} from "lucide-react";
+  LuUser,
+  LuMapPin,
+  LuPackage,
+  LuLogOut,
+  LuChevronRight,
+  LuLoaderCircle,
+  LuTruck,
+  LuCircleCheck,
+  LuPencil,
+  LuX,
+  LuHistory,
+  LuSettings,
+  LuCreditCard,
+  LuShieldCheck
+} from "react-icons/lu";
 
 import { useAuth } from "../context/AuthContext";
-import { useCart } from "../context/CartContext";
 import API from "../services/api";
-import { translations } from "../utils/translations";
 
-const Profile = ({ lang, setLang }) => {
-  const { user, login } = useAuth();
+const Profile = () => {
+  const { user, login, logout } = useAuth();
   const navigate = useNavigate();
-  const t = translations[lang] || translations["hi"];
 
-  // View state: DASHBOARD | EDIT_PROFILE | ADD_ADDRESS
-  const [view, setView] = useState("DASHBOARD");
+  const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [locationLoading, setLocationLoading] = useState(false);
-  const [pincodeLoading, setPincodeLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
 
   const [formData, setFormData] = useState({
@@ -42,9 +38,7 @@ const Profile = ({ lang, setLang }) => {
     pincode: "",
   });
 
-  const [villageList, setVillageList] = useState([]);
-  const [manualVillage, setManualVillage] = useState(false);
-  const [autofilledFields, setAutofilledFields] = useState([]);
+  const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     if (user) {
@@ -56,29 +50,32 @@ const Profile = ({ lang, setLang }) => {
         state: user.state || "",
         pincode: user.pincode || "",
       });
+      fetchOrders();
       setLoading(false);
     }
   }, [user]);
 
-  // --- ACTIONS ---
-  const handleUpdate = async () => {
-    if (!formData.name || !formData.phone) return showMsg("error", "Name & Phone are required");
-    if (!formData.district || !formData.state) return showMsg("error", "District & State are required");
+  const fetchOrders = async () => {
+    try {
+      const res = await API.get("/orders");
+      setOrders(res.data);
+    } catch (err) {
+      console.error("Failed to fetch orders");
+    }
+  };
 
+  const handleUpdate = async (e) => {
+    e.preventDefault();
     setUpdating(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await API.put(
-        "/users/me",
-        { ...formData, address: formData.village },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-
+      const res = await API.put("/users/me", formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       login(res.data, token);
-      setView("DASHBOARD");
-      showMsg("success", "Profile Updated ✅");
+      showMsg("success", "Profile updated successfully!");
     } catch (err) {
-      showMsg("error", "Update failed ❌");
+      showMsg("error", "Failed to update profile.");
     } finally {
       setUpdating(false);
     }
@@ -89,385 +86,251 @@ const Profile = ({ lang, setLang }) => {
     setTimeout(() => setMessage({ type: "", text: "" }), 3000);
   };
 
-  const handleDetectLocation = () => {
-    if (!navigator.geolocation) return showMsg("error", "GPS not supported");
-    setLocationLoading(true);
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`);
-          const data = await res.json();
-          const addr = data.address || {};
-
-          setFormData((prev) => ({
-            ...prev,
-            village: addr.village || addr.town || addr.city || addr.hamlet || prev.village,
-            pincode: addr.postcode || prev.pincode,
-            district: addr.state_district || addr.county || prev.district,
-            state: addr.state || prev.state
-          }));
-
-          setAutofilledFields(['village', 'pincode', 'district', 'state']);
-          showMsg("success", "Location detected ✅");
-        } catch (err) {
-          showMsg("error", "Detection failed");
-        } finally {
-          setLocationLoading(false);
-        }
-      },
-      () => {
-        setLocationLoading(false);
-        showMsg("error", "Permission denied");
-      }
-    );
-  };
-
-  const handlePincodeChange = async (val) => {
-    if (!/^\d*$/.test(val)) return;
-    setFormData((prev) => ({ ...prev, pincode: val }));
-    setAutofilledFields(prev => prev.filter(f => f !== 'pincode'));
-
-    if (val.length === 6) {
-      setPincodeLoading(true);
-      try {
-        const res = await fetch(`https://api.postalpincode.in/pincode/${val}`);
-        const data = await res.json();
-
-        if (data[0]?.Status === "Success") {
-          const postOffices = data[0].PostOffice || [];
-          const info = postOffices[0];
-
-          setFormData(prev => ({
-            ...prev,
-            district: info.District,
-            state: info.State
-          }));
-
-          setVillageList(postOffices.map(po => po.Name));
-          setAutofilledFields(prev => [...new Set([...prev, 'district', 'state', 'village'])]);
-          showMsg("success", "Auto-filled from pincode ✅");
-        } else {
-          showMsg("error", "Invalid pincode");
-          setVillageList([]);
-        }
-      } catch (err) {
-        showMsg("error", "Network error");
-        setVillageList([]);
-      } finally {
-        setPincodeLoading(false);
-      }
-    } else {
-      setVillageList([]);
-    }
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.href = "/login";
-  };
-
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gray-50">
-        <Loader2 className="animate-spin text-emerald-600" size={32} />
-      </div>
-    );
-  }
-
-  // --- SUB-COMPONENTS ---
-
-  const Header = ({ title, showBack = false }) => (
-    <div className="bg-white px-4 py-4 flex items-center border-b sticky top-0 z-10">
-      {showBack && (
-        <button onClick={() => setView("DASHBOARD")} className="mr-4 p-1 hover:bg-gray-100 rounded-full transition-colors">
-          <ArrowLeft size={24} className="text-gray-700" />
-        </button>
-      )}
-      <h1 className="text-lg font-semibold text-gray-800">{String(title).toUpperCase()}</h1>
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+       <LuLoaderCircle className="animate-spin text-emerald-600" size={40} />
     </div>
   );
 
-  const InfoTag = ({ icon: Icon, text, subtext, color = "emerald" }) => (
-    <div className={`p-4 bg-${color}-50 rounded-2xl flex items-start gap-4 border border-${color}-100`}>
-      <div className={`p-2 bg-${color}-100 rounded-xl text-${color}-600`}>
-        <Icon size={20} />
-      </div>
-      <div>
-        <h4 className={`text-sm font-semibold text-${color}-800 leading-tight`}>{text}</h4>
-        {subtext && <p className={`text-xs text-${color}-600/80 mt-0.5`}>{subtext}</p>}
-      </div>
-    </div>
-  );
-
-  // --- MAIN VIEWS ---
-
-  if (view === "EDIT_PROFILE" || view === "ADD_ADDRESS") {
-    return (
-      <div className="min-h-screen bg-gray-50 pb-20">
-        <Header title={view === "EDIT_PROFILE" ? "Edit Profile" : "Delivery Address"} showBack />
-
-        <div className="max-w-md mx-auto p-4 space-y-6">
-          {view === "EDIT_PROFILE" ? (
-            <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase ml-1">Full Name</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full mt-1.5 p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-                  placeholder="Enter your name"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase ml-1">Phone Number</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  readOnly
-                  className="w-full mt-1.5 p-3.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-500 cursor-not-allowed"
-                  placeholder="Phone number"
-                />
-                <p className="text-[10px] text-gray-400 mt-1 ml-1">Phone number cannot be changed</p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <button
-                onClick={handleDetectLocation}
-                disabled={locationLoading}
-                className="w-full py-4 bg-white border-2 border-emerald-600 text-emerald-600 font-semibold rounded-2xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-              >
-                {locationLoading ? <Loader2 className="animate-spin" size={20} /> : <MapPinned size={20} />}
-                {locationLoading ? "Detecting..." : "Use My Current Location"}
-              </button>
-
-              <div className="flex items-center gap-4">
-                <div className="h-px bg-gray-200 flex-1"></div>
-                <span className="text-xs font-bold text-gray-300">OR</span>
-                <div className="h-px bg-gray-200 flex-1"></div>
-              </div>
-
-              <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-4">
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase ml-1">Pincode</label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      maxLength="6"
-                      value={formData.pincode}
-                      onChange={(e) => handlePincodeChange(e.target.value)}
-                      className="w-full mt-1.5 p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all"
-                      placeholder="6 Digit PIN Code"
-                    />
-                    {pincodeLoading && <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 animate-spin text-emerald-600" size={20} />}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase ml-1">District</label>
-                    <input
-                      value={formData.district}
-                      onChange={(e) => {
-                        setFormData({ ...formData, district: e.target.value });
-                        setAutofilledFields(prev => prev.filter(f => f !== 'district'));
-                      }}
-                      className={`w-full mt-1.5 p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all ${autofilledFields.includes('district') ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50'
-                        }`}
-                      placeholder="District"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase ml-1">State</label>
-                    <input
-                      value={formData.state}
-                      onChange={(e) => {
-                        setFormData({ ...formData, state: e.target.value });
-                        setAutofilledFields(prev => prev.filter(f => f !== 'state'));
-                      }}
-                      className={`w-full mt-1.5 p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all ${autofilledFields.includes('state') ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50'
-                        }`}
-                      placeholder="State"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase ml-1">Village / Area</label>
-                  {!manualVillage && villageList.length > 0 ? (
-                    <div className="space-y-2">
-                      <select
-                        value={formData.village}
-                        onChange={(e) => {
-                          setFormData({ ...formData, village: e.target.value });
-                          setAutofilledFields(prev => prev.filter(f => f !== 'village'));
-                        }}
-                        className={`w-full mt-1.5 p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all appearance-none ${autofilledFields.includes('village') ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50'
-                          }`}
-                      >
-                        <option value="">Select Village</option>
-                        {villageList.map(v => <option key={v} value={v}>{v}</option>)}
-                      </select>
-                      <button
-                        onClick={() => setManualVillage(true)}
-                        className="text-emerald-600 text-[11px] font-bold ml-1 uppercase"
-                      >
-                        My village is not listed
-                      </button>
-                    </div>
-                  ) : (
-                    <input
-                      type="text"
-                      value={formData.village}
-                      onChange={(e) => {
-                        setFormData({ ...formData, village: e.target.value });
-                        setAutofilledFields(prev => prev.filter(f => f !== 'village'));
-                      }}
-                      className={`w-full mt-1.5 p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition-all ${autofilledFields.includes('village') ? 'bg-emerald-50 border-emerald-100' : 'bg-gray-50'
-                        }`}
-                      placeholder="Enter Village Name"
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          <button
-            onClick={handleUpdate}
-            disabled={updating}
-            className="w-full py-4 bg-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-emerald-200 flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-          >
-            {updating ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle2 size={20} />}
-            {updating ? "Saving Changes..." : "Save details"}
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const tabs = [
+    { id: "overview", name: "Account Overview", icon: LuUser },
+    { id: "orders", name: "My Orders", icon: LuHistory },
+    { id: "address", name: "Address Book", icon: LuMapPin },
+    { id: "settings", name: "Settings", icon: LuSettings },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <Header title="My Account" />
-
-      <div className="max-w-md mx-auto p-4 space-y-4">
-
-        {/* User Card */}
-        <div className="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100">
-              <User size={28} />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-800 leading-tight">{formData.name || "Farmer Ji"}</h2>
-              <p className="text-gray-500 text-sm font-medium">{formData.phone}</p>
-            </div>
-          </div>
-          <button
-            onClick={() => setView("EDIT_PROFILE")}
-            className="p-2.5 bg-gray-50 text-gray-400 hover:text-emerald-600 rounded-xl transition-colors"
-          >
-            <Edit2 size={18} />
-          </button>
+    <div className="min-h-screen bg-[#f8faf9] py-12 px-4 md:px-10">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Header */}
+        <div className="mb-10">
+           <h1 className="text-3xl font-black text-gray-900 tracking-tight">My <span className="text-emerald-600">Account</span></h1>
+           <p className="text-gray-500 font-medium mt-1">Manage your profile, orders, and addresses</p>
         </div>
 
-        {/* Address Card */}
-        <div className="bg-white p-5 rounded-2xl border shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Default Delivery Address</h3>
-            {formData.village && (
-              <span className="text-[10px] px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-bold uppercase">Active</span>
-            )}
-          </div>
-
-          <div className="flex items-start gap-3">
-            <div className="p-2 bg-gray-50 rounded-lg text-gray-400">
-              <MapPin size={20} />
+        <div className="flex flex-col lg:flex-row gap-8">
+          
+          {/* Sidebar */}
+          <aside className="w-full lg:w-80 shrink-0 space-y-6">
+            
+            {/* User Info Card */}
+            <div className="bg-white rounded-[32px] p-8 border border-gray-100 shadow-sm text-center">
+               <div className="relative w-24 h-24 mx-auto mb-4">
+                  <div className="w-full h-full bg-emerald-100 rounded-[32px] flex items-center justify-center text-emerald-700 font-black text-3xl">
+                     {user?.name?.[0] || "U"}
+                  </div>
+                  <button className="absolute bottom-0 right-0 w-8 h-8 bg-white border border-gray-100 rounded-xl flex items-center justify-center text-gray-400 hover:text-emerald-600 shadow-lg transition-all">
+                     <LuPencil size={14} />
+                  </button>
+               </div>
+               <h2 className="text-xl font-black text-gray-900 leading-none">{user?.name}</h2>
+               <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mt-2">{user?.role || "Customer"}</p>
+               
+               <div className="grid grid-cols-2 gap-4 mt-8 pt-8 border-t border-gray-50">
+                  <div className="text-center">
+                     <p className="text-lg font-black text-gray-900 leading-none">{orders.length}</p>
+                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Orders</p>
+                  </div>
+                  <div className="text-center border-l border-gray-50">
+                     <p className="text-lg font-black text-emerald-600 leading-none">₹{orders.reduce((sum, o) => sum + o.totalPrice, 0).toLocaleString()}</p>
+                     <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Spent</p>
+                  </div>
+               </div>
             </div>
-            <div className="flex-1">
-              {formData.village ? (
-                <div className="text-gray-700">
-                  <p className="font-semibold text-base">{formData.village}</p>
-                  <p className="text-sm font-medium text-gray-500">{formData.district}, {formData.state} - {formData.pincode}</p>
+
+            {/* Navigation Tabs */}
+            <nav className="bg-white rounded-[32px] p-4 border border-gray-100 shadow-sm">
+               {tabs.map(tab => (
+                 <button
+                   key={tab.id}
+                   onClick={() => setActiveTab(tab.id)}
+                   className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold transition-all ${
+                     activeTab === tab.id ? "bg-emerald-600 text-white shadow-xl shadow-emerald-100" : "text-gray-500 hover:bg-gray-50"
+                   }`}
+                 >
+                   <tab.icon size={18} />
+                   {tab.name}
+                   {activeTab === tab.id && <LuChevronRight className="ml-auto" size={16} />}
+                 </button>
+               ))}
+               <button 
+                onClick={() => { logout(); navigate("/login"); }}
+                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all mt-2"
+               >
+                 <LuLogOut size={18} />
+                 Sign Out
+               </button>
+            </nav>
+          </aside>
+
+          {/* Main Content Area */}
+          <main className="flex-1">
+             
+             {/* Tab Content: OVERVIEW */}
+             {activeTab === "overview" && (
+                <div className="space-y-8 animate-in fade-in duration-500">
+                   <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm">
+                      <div className="flex items-center justify-between mb-8">
+                         <h3 className="text-xl font-black text-gray-900">Personal Information</h3>
+                         <LuShieldCheck className="text-emerald-500" size={24} />
+                      </div>
+                      
+                      <form onSubmit={handleUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                            <input 
+                               type="text"
+                               value={formData.name}
+                               onChange={(e) => setFormData({...formData, name: e.target.value})}
+                               className="w-full px-6 py-4 bg-gray-50 rounded-2xl border-transparent border focus:bg-white focus:border-emerald-200 focus:ring-4 focus:ring-emerald-500/5 outline-none transition-all font-bold text-gray-800"
+                            />
+                         </div>
+                         <div className="space-y-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
+                            <input 
+                               type="text"
+                               value={formData.phone}
+                               readOnly
+                               className="w-full px-6 py-4 bg-gray-100 rounded-2xl border-transparent border text-gray-400 cursor-not-allowed font-bold"
+                            />
+                         </div>
+                         <div className="space-y-2 md:col-span-2">
+                            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+                            <input 
+                               type="email"
+                               value={user?.email || ""}
+                               readOnly
+                               className="w-full px-6 py-4 bg-gray-100 rounded-2xl border-transparent border text-gray-400 cursor-not-allowed font-bold"
+                            />
+                         </div>
+                         <div className="md:col-span-2 pt-4">
+                            <button 
+                               type="submit"
+                               disabled={updating}
+                               className="px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-xl shadow-emerald-100 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:hover:scale-100"
+                            >
+                               {updating ? "Saving..." : "Save Changes"}
+                            </button>
+                         </div>
+                      </form>
+                   </div>
+
+                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col items-center text-center">
+                         <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 mb-4">
+                            <LuTruck size={24} />
+                         </div>
+                         <h4 className="text-sm font-black text-gray-900 mb-1">Fast Delivery</h4>
+                         <p className="text-xs text-gray-500 font-medium">To your village doorstep</p>
+                      </div>
+                      <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col items-center text-center">
+                         <div className="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 mb-4">
+                            <LuCreditCard size={24} />
+                         </div>
+                         <h4 className="text-sm font-black text-gray-900 mb-1">Udhaar Facility</h4>
+                         <p className="text-xs text-gray-500 font-medium">Available for local farmers</p>
+                      </div>
+                      <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm flex flex-col items-center text-center">
+                         <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 mb-4">
+                            <LuShieldCheck size={24} />
+                         </div>
+                         <h4 className="text-sm font-black text-gray-900 mb-1">Quality Assured</h4>
+                         <p className="text-xs text-gray-500 font-medium">100% Genuine Equipment</p>
+                      </div>
+                   </div>
                 </div>
-              ) : (
-                <p className="text-gray-400 italic">No address added yet</p>
-              )}
-            </div>
-          </div>
+             )}
 
-          <button
-            onClick={() => setView("ADD_ADDRESS")}
-            className="w-full mt-2 py-3 bg-gray-50 text-emerald-600 font-bold rounded-xl text-sm hover:bg-emerald-50 transition-colors"
-          >
-            {formData.village ? "Change Address" : "Add Address"}
-          </button>
+             {/* Tab Content: ORDERS */}
+             {activeTab === "orders" && (
+                <div className="space-y-6 animate-in fade-in duration-500">
+                   <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm">
+                      <h3 className="text-xl font-black text-gray-900 mb-8">Recent Orders</h3>
+                      {orders.length === 0 ? (
+                         <div className="text-center py-20">
+                            <LuPackage className="mx-auto text-gray-200 mb-4" size={64} />
+                            <p className="text-gray-500 font-bold">No orders found.</p>
+                            <button onClick={() => navigate("/products")} className="mt-4 text-emerald-600 font-black hover:underline">Start Shopping</button>
+                         </div>
+                      ) : (
+                         <div className="space-y-4">
+                            {orders.map(order => (
+                               <div key={order._id} className="group flex flex-col md:flex-row md:items-center justify-between p-6 bg-gray-50 rounded-3xl border border-transparent hover:border-emerald-100 hover:bg-white transition-all cursor-pointer">
+                                  <div className="flex items-center gap-6">
+                                     <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-emerald-600 shadow-sm">
+                                        <LuPackage size={28} />
+                                     </div>
+                                     <div>
+                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Order #{order._id.slice(-6)}</p>
+                                        <h4 className="text-lg font-black text-gray-900">₹{order.totalPrice.toLocaleString()}</h4>
+                                        <p className="text-xs text-gray-500 font-medium">{new Date(order.createdAt).toLocaleDateString()}</p>
+                                     </div>
+                                  </div>
+                                  <div className="mt-4 md:mt-0 flex items-center gap-6">
+                                     <div className="text-right">
+                                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                           order.orderStatus === 'Delivered' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'
+                                        }`}>
+                                           {order.orderStatus}
+                                        </span>
+                                     </div>
+                                     <LuChevronRight size={20} className="text-gray-300 group-hover:text-emerald-600 transition-colors" />
+                                  </div>
+                               </div>
+                            ))}
+                         </div>
+                      )}
+                   </div>
+                </div>
+             )}
+
+             {/* Tab Content: ADDRESS */}
+             {activeTab === "address" && (
+                <div className="animate-in fade-in duration-500">
+                   <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm">
+                      <h3 className="text-xl font-black text-gray-900 mb-8">Delivery Address</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div className="bg-[#fcfdfd] p-8 rounded-[32px] border-2 border-emerald-100 relative">
+                            <div className="absolute top-6 right-6 w-6 h-6 bg-emerald-600 rounded-full flex items-center justify-center text-white">
+                               <LuCircleCheck size={14} />
+                            </div>
+                            <LuMapPin className="text-emerald-600 mb-4" size={32} />
+                            <h4 className="text-lg font-black text-gray-900 mb-2">Default Address</h4>
+                            <p className="text-sm text-gray-600 font-medium leading-relaxed">
+                               {formData.village}, {formData.district}<br />
+                               {formData.state} - {formData.pincode}
+                            </p>
+                            <button className="mt-6 flex items-center gap-2 text-emerald-600 font-black text-sm hover:underline">
+                               <LuPencil size={14} /> Edit Address
+                            </button>
+                         </div>
+
+                         <button className="bg-gray-50 border-2 border-dashed border-gray-200 p-8 rounded-[32px] flex flex-col items-center justify-center text-center group hover:bg-emerald-50 hover:border-emerald-200 transition-all">
+                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-emerald-600 shadow-sm mb-4">
+                               <LuX className="rotate-45" size={24} />
+                            </div>
+                            <span className="text-sm font-black text-gray-900">Add New Address</span>
+                         </button>
+                      </div>
+                   </div>
+                </div>
+             )}
+
+          </main>
         </div>
-
-        {/* Info Card */}
-        <div className="space-y-3">
-          <InfoTag
-            icon={Truck}
-            text="Fast Delivery in 1-2 Days"
-            subtext="Quick delivery to your village doorstep"
-          />
-          <InfoTag
-            icon={MapPinned}
-            text={`Delivering in all areas`}
-            subtext="Local service for local farmers"
-            color="orange"
-          />
-        </div>
-
-        {/* Quick Links */}
-        <div className="bg-white rounded-2xl border overflow-hidden shadow-sm">
-          <button
-            onClick={() => navigate("/orders")}
-            className="w-full p-4 flex items-center justify-between text-gray-700 bg-gray-50 active:bg-gray-100 transition-colors border-b last:border-b-0"
-          >
-            <div className="flex items-center gap-3">
-              <Package className="text-emerald-500" size={20} />
-              <span className="font-semibold">My Orders</span>
-            </div>
-            <ChevronRight className="text-gray-300" size={20} />
-          </button>
-        </div>
-
-        {/* Delivering To Highlight (Bonus) */}
-        {formData.village && (
-          <div className="bg-emerald-600/5 border border-emerald-600/10 p-3 rounded-xl flex items-center justify-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <p className="text-xs font-bold text-emerald-700">
-              Delivering to: <span className="underline decoration-wavy decoration-emerald-300 underline-offset-4">{formData.village}</span>
-            </p>
-          </div>
-        )}
-
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          className="w-full mt-4 p-4 text-red-500 font-bold text-center bg-red-50 rounded-2xl transition-colors border border-transparent"
-        >
-          <div className="flex items-center justify-center gap-2">
-            <LogOut size={20} />
-            Logout
-          </div>
-        </button>
-
       </div>
 
-      {/* Global Toast */}
+      {/* Global Message Toast */}
       {message.text && (
-        <div className="fixed bottom-24 left-4 right-4 z-50">
-          <div className={`flex items-center gap-2 p-4 rounded-2xl shadow-xl border animate-in slide-in-from-bottom duration-300 ${message.type === "success" ? "bg-emerald-600 border-emerald-500 text-white" : "bg-red-600 border-red-500 text-white"
+         <div className="fixed bottom-10 right-10 z-[100] animate-in slide-in-from-right duration-500">
+            <div className={`flex items-center gap-4 px-8 py-4 rounded-3xl shadow-2xl border ${
+               message.type === 'success' ? 'bg-emerald-600 border-emerald-500 text-white' : 'bg-red-600 border-red-500 text-white'
             }`}>
-            {message.type === "success" ? <CheckCircle2 size={20} /> : <X size={20} />}
-            <span className="font-bold text-sm">{message.text}</span>
-          </div>
-        </div>
+               {message.type === 'success' ? <LuCircleCheck size={24} /> : <LuX size={24} />}
+               <p className="font-black text-sm tracking-tight">{message.text}</p>
+            </div>
+         </div>
       )}
     </div>
   );
