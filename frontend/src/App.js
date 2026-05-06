@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { LanguageProvider } from "./context/LanguageContext";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -44,76 +45,78 @@ const AdminSettings = lazy(() => import("./pages/admin/Settings"));
 const AdminUsers = lazy(() => import("./pages/admin/Users"));
 
 function App() {
-  const [lang, setLang] = useState("en");
-
   return (
-    <AuthProvider>
-      <CartProvider>
-        <BrowserRouter>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              duration: 3000,
-              style: {
-                background: "#10b981",
-                color: "#fff",
-                borderRadius: "16px",
-              },
-            }}
-          />
+    <LanguageProvider>
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  background: "#10b981",
+                  color: "#fff",
+                  borderRadius: "16px",
+                },
+              }}
+            />
 
-          <Suspense fallback={<GlobalLoader />}>
-            <Routes>
+            <Suspense fallback={<GlobalLoader />}>
+              <Routes>
 
-              {/* USER */}
-              <Route element={<UserLayout lang={lang} setLang={setLang} />}>
-                <Route path="/" element={<Home lang={lang} />} />
-                <Route path="/products" element={<Products lang={lang} />} />
-                <Route path="/product/:id" element={<ProductDetails lang={lang} />} />
-                <Route path="/login" element={<Login lang={lang} />} />
-                <Route path="/register" element={<Register lang={lang} />} />
+                {/* USER */}
+                <Route element={<UserLayout />}>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/products" element={<Products />} />
+                  <Route path="/product/:id" element={<ProductDetails />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
 
-                <Route path="/shipping" element={<ShippingPolicy />} />
-                <Route path="/returns" element={<ReturnsRefunds />} />
-                <Route path="/bulk" element={<BulkOrders />} />
-                <Route path="/contact" element={<ContactUs />} />
+                  <Route path="/shipping" element={<ShippingPolicy />} />
+                  <Route path="/returns" element={<ReturnsRefunds />} />
+                  <Route path="/bulk" element={<BulkOrders />} />
+                  <Route path="/contact" element={<ContactUs />} />
 
-                <Route path="/cart" element={<ProtectedRoute><Cart lang={lang} /></ProtectedRoute>} />
-                <Route path="/checkout" element={<ProtectedRoute><Checkout lang={lang} /></ProtectedRoute>} />
-                <Route path="/orders" element={<ProtectedRoute><Orders lang={lang} /></ProtectedRoute>} />
-                <Route path="/orders/:id" element={<ProtectedRoute><OrderDetails lang={lang} /></ProtectedRoute>} />
-                <Route path="/profile" element={<ProtectedRoute><Profile lang={lang} setLang={setLang} /></ProtectedRoute>} />
-              </Route>
+                  <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
+                  <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+                  <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+                  <Route path="/orders/:id" element={<ProtectedRoute><OrderDetails /></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                </Route>
 
-              {/* ADMIN */}
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                }
-              >
-                <Route path="dashboard" element={<AdminDashboard lang={lang} />} />
-                <Route path="products" element={<AdminProducts lang={lang} />} />
-                <Route path="inventory" element={<AdminInventory lang={lang} />} />
-                <Route path="billing" element={<AdminBilling lang={lang} />} />
-                <Route path="orders" element={<AdminOrders lang={lang} />} />
-                <Route path="customers" element={<AdminCustomers lang={lang} />} />
-                <Route path="suppliers" element={<AdminSuppliers lang={lang} />} />
-                <Route path="reports" element={<AdminReports lang={lang} />} />
-                <Route path="settings" element={<AdminSettings lang={lang} />} />
-                <Route path="users" element={<AdminUsers lang={lang} />} />
-              </Route>
+                {/* ADMIN */}
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <AdminLayout />
+                    </AdminRoute>
+                  }
+                >
+                  <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="products" element={<AdminProducts />} />
+                  <Route path="inventory" element={<AdminInventory />} />
+                  <Route path="billing" element={<AdminBilling />} />
+                  <Route path="orders" element={<AdminOrders />} />
+                  <Route path="customers" element={<AdminCustomers />} />
+                  <Route path="suppliers" element={<AdminSuppliers />} />
+                  <Route path="reports" element={<AdminReports />} />
+                  <Route path="settings" element={<AdminSettings />} />
+                  <Route path="users" element={<AdminUsers />} />
+                </Route>
 
-              <Route path="*" element={<Notfound lang={lang} />} />
+                <Route path="*" element={<Notfound />} />
 
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </CartProvider>
-    </AuthProvider>
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
 export default App;
+
+

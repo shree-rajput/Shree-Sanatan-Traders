@@ -9,6 +9,11 @@ const variantSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  costPrice: {
+    type: Number,
+    required: true,
+    default: 0
+  },
   unit: {
     type: String, // meter roll, piece
     required: true

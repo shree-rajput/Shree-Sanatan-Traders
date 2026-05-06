@@ -8,8 +8,18 @@ exports.dashboard = async (req, res) => {
     const productsCount = await Product.countDocuments();
     const orders = await Order.find();
     
-    // Total Sales
-    const totalSales = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+    // Total Sales & Profit
+    let totalSales = 0;
+    let totalProfit = 0;
+    
+    orders.forEach(order => {
+      totalSales += (order.totalPrice || 0);
+      order.items.forEach(item => {
+        const price = item.variant?.price || 0;
+        const cost = item.variant?.costPrice || 0;
+        totalProfit += (price - cost) * (item.quantity || 0);
+      });
+    });
     
     // Low Stock Alert (Less than 10)
     const lowStockProducts = await Product.find({ stock: { $lt: 10 } });
@@ -36,15 +46,32 @@ exports.dashboard = async (req, res) => {
       { $sort: { "_id": 1 } }
     ]);
 
+    // Top Selling Products
+    const topProducts = await Order.aggregate([
+      { $unwind: "$items" },
+      {
+        $group: {
+          _id: "$items.product",
+          name: { $first: "$items.name" },
+          totalQty: { $sum: "$items.quantity" },
+          revenue: { $sum: { $multiply: ["$items.variant.price", "$items.quantity"] } }
+        }
+      },
+      { $sort: { totalQty: -1 } },
+      { $limit: 5 }
+    ]);
+
     res.json({ 
       usersCount, 
       productsCount, 
       ordersCount: orders.length,
       totalSales,
+      totalProfit,
       lowStockCount: lowStockProducts.length,
       lowStockProducts,
       recentSales,
-      salesData
+      salesData,
+      topProducts
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

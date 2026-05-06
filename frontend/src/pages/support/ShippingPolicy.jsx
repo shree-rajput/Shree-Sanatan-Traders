@@ -1,38 +1,57 @@
 import React from "react";
+import { useLanguage } from "../../context/LanguageContext";
+import {
+  LuTruck,
+  LuClock,
+  LuShieldCheck,
+  //  LuAlertCircle
+} from "react-icons/lu";
 
 const ShippingPolicy = () => {
+  const { t } = useLanguage();
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 font-sans overflow-x-hidden">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 md:p-12">
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-8 border-b border-gray-100 pb-4">Shipping Policy</h1>
-          
-          <div className="space-y-6 text-gray-600 leading-relaxed">
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-3">1. Order Processing Times</h2>
-              <p>
-                All orders are processed within 1-2 business days. Orders are not shipped or delivered on weekends or holidays. If we are experiencing a high volume of orders, shipments may be delayed by a few days.
+    <div className="min-h-screen bg-green-50/30 py-20 font-sans relative overflow-hidden">
+      {/* Decorative background element */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-green-600/5 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+
+      <div className="max-w-4xl mx-auto px-6 relative z-10">
+        <div className="bg-white rounded-[48px] shadow-2xl border-4 border-white p-10 md:p-16">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="w-16 h-16 bg-green-50 rounded-[24px] flex items-center justify-center text-green-600 shadow-sm">
+              <LuTruck size={32} />
+            </div>
+            <h1 className="text-4xl font-black text-gray-900 tracking-tight">{t('shipping_policy_title')}</h1>
+          </div>
+
+          <div className="space-y-12">
+            <section className="bg-green-50/30 p-8 rounded-[32px] border-2 border-green-50">
+              <div className="flex items-center gap-3 mb-4">
+                <LuClock className="text-green-600" size={24} />
+                <h2 className="text-xl font-black text-gray-800 tracking-tight">{t('shipping_sec_1')}</h2>
+              </div>
+              <p className="text-gray-500 font-bold leading-relaxed">
+                {t('shipping_sec_1_desc')}
               </p>
             </section>
 
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-3">2. Shipping Rates & Delivery Estimates</h2>
-              <p>
-                Shipping charges for your order will be calculated and displayed at checkout. Standard delivery typically takes 3-5 business days. Please note that delivery delays can occasionally occur due to regional constraints or severe weather.
+            <section className="bg-green-50/30 p-8 rounded-[32px] border-2 border-green-50">
+              <div className="flex items-center gap-3 mb-4">
+                <LuShieldCheck className="text-green-600" size={24} />
+                <h2 className="text-xl font-black text-gray-800 tracking-tight">{t('shipping_sec_2')}</h2>
+              </div>
+              <p className="text-gray-500 font-bold leading-relaxed">
+                {t('shipping_sec_2_desc')}
               </p>
             </section>
 
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-3">3. Shipment Confirmation & Order Tracking</h2>
-              <p>
-                You will receive a Shipment Confirmation email once your order has shipped containing your tracking number(s). The tracking number will be active within 24 hours.
-              </p>
-            </section>
-
-            <section>
-              <h2 className="text-xl font-bold text-gray-800 mb-3">4. Damages</h2>
-              <p>
-                Shree Sanatan Traders is not liable for any products damaged or lost during shipping. If you received your order damaged, please contact the shipment carrier to file a claim. Save all packaging materials and damaged goods before filing a claim.
+            <section className="p-8 border-2 border-green-50 rounded-[32px] bg-white">
+              <div className="flex items-center gap-3 mb-4">
+                {/* <LuAlertCircle className="text-green-600" size={24} /> */}
+                <h2 className="text-xl font-black text-gray-800 tracking-tight">Important Notes</h2>
+              </div>
+              <p className="text-gray-500 font-bold leading-relaxed">
+                We deliver directly to your village or farm in Kargoon district. Ensure your mobile number is active for our delivery partners to reach you easily.
               </p>
             </section>
           </div>

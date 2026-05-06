@@ -11,14 +11,15 @@ const {
 
 const auth = require("../middleware/auth");
 const isAdmin = require("../middleware/isAdmin");
+const upload = require("../middleware/upload");
 
 // public
 router.get("/", getProducts);
 router.get("/:id", getProduct);
 
 // admin
-router.post("/", auth, isAdmin, createProduct);
-router.put("/:id", auth, isAdmin, updateProduct);
+router.post("/", auth, isAdmin, upload.array("images", 5), createProduct);
+router.put("/:id", auth, isAdmin, upload.array("images", 5), updateProduct);
 router.delete("/:id", auth, isAdmin, deleteProduct);
 
 module.exports = router;

@@ -1,116 +1,137 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import API from "../services/api";
-import { translations } from "../utils/translations";
+import { LuChevronLeft, LuPackage, LuMapPin, LuCreditCard, LuCircleCheck, LuLoaderCircle, LuCalendar, LuHash, LuBox } from "react-icons/lu";
+import toast from "react-hot-toast";
 
-const OrderDetails = ({ lang = "en" }) => {
-  const t = translations[lang] || translations["en"];
+const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const res = await API.get(`/orders/${id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await API.get(`/orders/${id}`);
         setOrder(res.data);
       } catch (err) {
-        console.error(err);
-        setError(lang === 'en' ? "Failed to load order details." : "ऑर्डर विवरण लोड करने में विफल।");
+        toast.error("Failed to load order details");
       } finally {
         setLoading(false);
       }
     };
     fetchOrder();
-  }, [id, lang]);
+  }, [id]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-emerald-500"></div>
+        <LuLoaderCircle className="animate-spin text-green-600" size={40} />
       </div>
     );
   }
 
-  if (error || !order) {
+  if (!order) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">{error || "Order not found"}</h2>
-        <button onClick={() => navigate("/orders")} className="text-emerald-600 underline font-semibold">
-          {lang === 'en' ? 'Return to Orders' : 'ऑर्डर पर वापस जाएं'}
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 text-center">
+        <LuBox size={60} className="text-gray-200 mb-6" />
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Order not found</h2>
+        <button onClick={() => navigate("/orders")} className="px-8 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-all">
+          Back to Orders
         </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button onClick={() => navigate("/orders")} className="mb-6 flex items-center text-sm font-medium text-gray-500 hover:text-emerald-600 transition">
-          &larr; {lang === 'en' ? 'Back to all orders' : 'सभी ऑर्डर पर वापस जाएं'}
+    <div className="min-h-screen bg-gray-50 py-12 md:py-20 px-6">
+      <div className="max-w-4xl mx-auto">
+        <button onClick={() => navigate("/orders")} className="flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-green-600 transition-colors mb-8">
+          <LuChevronLeft size={20} /> Back to Orders
         </button>
 
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
-          <div className="bg-gradient-to-r from-emerald-800 to-green-700 px-8 py-6 flex flex-col sm:flex-row sm:items-center justify-between text-white">
+        <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+          {/* Header */}
+          <div className="p-8 md:p-12 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <p className="text-emerald-200 text-sm font-semibold uppercase tracking-wider">{lang === 'en' ? 'Order Receipt' : 'ऑर्डर रसीद'}</p>
-              <h1 className="text-2xl font-bold">ID: {order._id}</h1>
+              <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">
+                <LuHash size={14} /> Order ID
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">#{order._id.slice(-8).toUpperCase()}</h1>
+              <div className="flex items-center gap-2 mt-2 text-gray-400 font-medium text-sm">
+                <LuCalendar size={16} /> {new Date(order.createdAt).toLocaleDateString()}
+              </div>
             </div>
-            <div className="mt-4 sm:mt-0 text-left sm:text-right">
-               <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-bold uppercase tracking-wider bg-white ${
-                  order.paymentStatus === 'pending' ? 'text-yellow-600' : 
-                  order.paymentStatus === 'paid' ? 'text-green-600' : 'text-gray-900'
-                }`}>
-                  {order.paymentStatus || 'Status Unknown'}
-                </span>
+            <div className={`px-6 py-2 rounded-full font-bold text-xs uppercase tracking-widest ${
+              order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+            }`}>
+              {order.orderStatus}
             </div>
           </div>
 
-          <div className="p-8">
-            <h3 className="text-lg font-bold text-gray-900 mb-6 border-b border-gray-100 pb-2">{t.itemsPurchased}</h3>
-            <div className="space-y-4 mb-8">
-              {order.items?.map((item, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-gray-50 p-4 rounded-xl border border-gray-100">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white rounded-lg border border-gray-200 overflow-hidden shrink-0">
-                      {item.product?.images?.[0] ? <img src={item.product.images[0]} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full flex items-center justify-center text-gray-400">📦</div>}
+          <div className="p-8 md:p-12">
+            {/* Items */}
+            <div className="mb-12">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Items Purchased</h3>
+              <div className="space-y-4">
+                {order.items?.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white rounded-xl border border-gray-100 flex items-center justify-center text-gray-200 overflow-hidden">
+                        {item.product?.images?.[0] ? (
+                          <img src={item.product.images[0]} className="w-full h-full object-cover" alt="" />
+                        ) : <LuPackage size={24} />}
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-900">{item.name || "Product"}</p>
+                        <p className="text-xs text-gray-400 font-bold">Qty: {item.quantity}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-gray-900">{item.name || item.product?.name || "Item"}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
-                    </div>
+                    <p className="font-bold text-gray-900">₹{(item.price || 0).toLocaleString()}</p>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t border-gray-100">
-              <div>
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{t.deliveredTo}</h3>
-                <p className="text-gray-800 bg-gray-50 p-4 rounded-xl border border-gray-100">{order.shippingAddress || "N/A"}</p>
+            {/* Grid */}
+            <div className="grid md:grid-cols-2 gap-10 pt-10 border-t border-gray-50">
+              {/* Shipping */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  <LuMapPin size={16} className="text-green-600" /> Delivery Address
+                </div>
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 text-gray-600 font-medium text-sm leading-relaxed">
+                  {order.shippingAddress}
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">{lang === 'en' ? 'Payment Details' : 'भुगतान विवरण'}</h3>
-                <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 space-y-2">
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{lang === 'en' ? 'Products Total' : 'उत्पाद कुल'}</span>
-                    <span>₹{order.totalPrice - (order.deliveryCharge || 0)}</span>
+
+              {/* Summary */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+                  <LuCreditCard size={16} className="text-green-600" /> Payment Summary
+                </div>
+                <div className="bg-gray-900 text-white p-8 rounded-3xl space-y-4">
+                  <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest">
+                    <span>Payment Status</span>
+                    <span className={order.paymentStatus === 'paid' ? 'text-green-400' : 'text-amber-400'}>{order.paymentStatus}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>{lang === 'en' ? 'Delivery Charge' : 'वितरण शुल्क'}</span>
-                    <span>₹{order.deliveryCharge || 0}</span>
-                  </div>
-                  <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between items-center">
-                    <span className="font-bold text-gray-900">{t.total}</span>
-                    <span className="font-black text-xl text-emerald-600">₹{order.totalPrice}</span>
+                  <div className="pt-4 border-t border-white/10 flex justify-between items-end">
+                    <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Total Amount</span>
+                    <span className="text-3xl font-bold">₹{order.totalPrice?.toLocaleString()}</span>
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Footer */}
+            <div className="mt-16 flex flex-col md:flex-row items-center justify-center gap-10 text-gray-300">
+               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                  <LuCircleCheck className="text-green-600" size={16} /> Authentic Invoice
+               </div>
+               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
+                  <LuPackage className="text-green-600" size={16} /> Quality Verified
+               </div>
             </div>
           </div>
         </div>

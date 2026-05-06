@@ -13,13 +13,16 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: "All fields required" });
     }
 
-    // ✅ check existing user
-    const existingUser = await User.findOne({
-      $or: [{ email }, { phone }]
-    });
+    // ✅ check existing email
+    const emailExists = await User.findOne({ email });
+    if (emailExists) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
 
-    if (existingUser) {
-      return res.status(400).json({ message: "Email or phone already exists" });
+    // ✅ check existing phone
+    const phoneExists = await User.findOne({ phone });
+    if (phoneExists) {
+      return res.status(400).json({ message: "Phone number already registered" });
     }
 
     // ✅ hash password
@@ -40,8 +43,12 @@ exports.register = async (req, res) => {
       { expiresIn: "7d" }
     );
 
+    // ✅ Exclude password from response
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
     res.json({
-      user,
+      user: userResponse,
       token
     });
 

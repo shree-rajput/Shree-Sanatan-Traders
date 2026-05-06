@@ -3,10 +3,10 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
-const UserLayout = ({ lang, setLang }) => {
+const UserLayout = () => {
   return (
     <div className="flex flex-col min-h-screen bg-white">
-      <Navbar lang={lang} setLang={setLang} />
+      <Navbar />
       <main className="flex-grow">
         <Outlet />
       </main>

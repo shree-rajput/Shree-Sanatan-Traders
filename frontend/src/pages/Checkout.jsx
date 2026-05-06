@@ -3,27 +3,42 @@ import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import toast from "react-hot-toast";
 import API from "../services/api";
-import { translations } from "../utils/translations";
+import { LuMapPin, LuCircleCheck, LuShoppingBag, LuChevronLeft, LuArrowRight, LuLoaderCircle, LuTruck, LuCreditCard } from "react-icons/lu";
 
-const Checkout = ({ lang = "en" }) => {
-  const t = translations[lang] || translations["en"];
+const loadScript = (src) => {
+  return new Promise((resolve) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
+const Checkout = () => {
   const { cartItems, totalPrice, clearCart } = useCart();
-  const [address, setAddress] = useState("");
+  const [address, setAddress] = useState({
+    address: "",
+    city: "",
+    state: "",
+    pincode: "",
+    phone: ""
+  });
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1); // Step 1: Address, Step 2: Summary/Pay
+  const [step, setStep] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (cartItems.length === 0) {
-      toast.error(lang === 'en' ? "Your cart is empty. Please add items to checkout." : "आपका कार्ट खाली है। कृपया खरीदारी करें।");
+      toast.error("Your cart is empty");
       navigate("/products");
     }
-  }, [cartItems, navigate, lang]);
+  }, [cartItems, navigate]);
 
   const handleNextStep = (e) => {
     e.preventDefault();
-    if (!address.trim() || address.length < 10) {
-      toast.error(lang === 'en' ? "Please provide a valid, detailed shipping address." : "कृपया एक सही और विस्तृत शिपिंग पता प्रदान करें।");
+    if (!address.address.trim() || !address.city.trim() || !address.state.trim() || !address.pincode.trim() || !address.phone.trim()) {
+      toast.error("Please fill all shipping details");
       return;
     }
     setStep(2);
@@ -31,123 +46,198 @@ const Checkout = ({ lang = "en" }) => {
 
   const handlePlaceOrder = async () => {
     setLoading(true);
+    
+    const resScript = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+    if (!resScript) {
+      toast.error("Payment system failed to load. Please try again.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem("token");
-      await API.post(
-        "/orders",
-        { shippingAddress: address },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      clearCart();
-      toast.success(lang === 'en' ? "Order placed successfully! Thank you for trusting us." : "ऑर्डर सफलतापूर्वक दिया गया! हम पर भरोसा करने के लिए धन्यवाद।", { duration: 5000 });
-      navigate("/orders");
+      const orderRes = await API.post("/orders", { shippingAddress: `${address.address}, ${address.city}, ${address.state} - ${address.pincode}`, phone: address.phone });
+      const orderData = orderRes.data;
+
+      const paymentRes = await API.post("/payment/create", { amount: orderData.totalPrice });
+      const paymentData = paymentRes.data;
+
+      const options = {
+        key: "rzp_test_placeholder",
+        amount: paymentData.amount,
+        currency: paymentData.currency,
+        name: "Sheshanathan Traders",
+        description: "Payment for order #" + orderData._id.slice(-6),
+        order_id: paymentData.id,
+        handler: async (response) => {
+          try {
+            const verifyRes = await API.post("/payment/verify", response);
+            if (verifyRes.data.success) {
+              clearCart();
+              toast.success("Order placed successfully!", { icon: '📦' });
+              navigate("/orders");
+            }
+          } catch (err) {
+            toast.error("Payment verification failed");
+          }
+        },
+        prefill: {
+          name: "",
+          email: "",
+          contact: address.phone
+        },
+        theme: { color: "#16a34a" },
+        modal: { ondismiss: () => setLoading(false) }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || (lang === 'en' ? "Failed to securely place order. Please try again." : "ऑर्डर देने में विफल। कृपया पुन: प्रयास करें।"));
+      toast.error(err.response?.data?.message || "Something went wrong. Please try again.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-emerald-50/20 flex flex-col pt-12 items-center px-4 font-sans pb-24">
-      {/* Checkout Progress Tracker */}
-      <div className="w-full max-w-2xl mb-8 flex justify-center items-center space-x-4">
-        <div className={`flex items-center space-x-2 ${step >= 1 ? 'text-emerald-700 font-bold' : 'text-gray-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 1 ? 'border-emerald-600 bg-emerald-50' : 'border-gray-300'}`}>1</div>
-          <span className="text-xs sm:text-sm">{lang === 'en' ? 'Shipping Details' : 'शिपिंग विवरण'}</span>
-        </div>
-        <div className={`w-16 h-1 border-t-2 ${step >= 2 ? 'border-emerald-600' : 'border-gray-300'}`}></div>
-        <div className={`flex items-center space-x-2 ${step >= 2 ? 'text-emerald-700 font-bold' : 'text-gray-400'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 2 ? 'border-emerald-600 bg-emerald-50' : 'border-gray-300'}`}>2</div>
-          <span className="text-xs sm:text-sm">{lang === 'en' ? 'Confirm & Pay' : 'पुष्टि और भुगतान'}</span>
-        </div>
-      </div>
-
-      <div className="max-w-2xl w-full bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100 p-8 sm:p-10">
+    <div className="min-h-screen bg-gray-50 py-12 md:py-20 px-6">
+      <div className="max-w-4xl mx-auto">
         
-        {step === 1 ? (
-          <div>
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">{t.address}</h2>
-            <p className="text-gray-500 mb-8">{lang === 'en' ? "Where should we securely deliver your premium lifestyle products?" : "हमें आपके प्रीमियम लाइफस्टाइल उत्पादों को कहाँ पहुंचाना चाहिए?"}</p>
-            
-            <form onSubmit={handleNextStep} className="space-y-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">{t.fullName || 'Full Delivery Address'}</label>
-                <textarea
-                  required
-                  rows="4"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all resize-none shadow-inner"
-                  placeholder={lang === 'en' ? "e.g. 123 Heritage Lane, Apartment 4B, City, ZIP Code" : "उदा. 123 हेरिटेज लेन, अपार्टमेंट 4बी, शहर, ज़िप कोड"}
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                ></textarea>
-                <p className="mt-2 text-xs text-gray-400">{lang === 'en' ? "Please be detailed. Our logistics partners require accurate addressing." : "कृपया विस्तार से बताएं। हमारे लॉजिस्टिक्स भागीदारों को सटीक पते की आवश्यकता होती है।"}</p>
+        <div className="text-center mb-16">
+          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <div className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold text-sm transition-all ${step >= 1 ? 'bg-green-600 text-white shadow-lg shadow-green-100' : 'bg-white text-gray-400 border border-gray-100'}`}>
+              <LuTruck size={18} /> Shipping
+            </div>
+            <div className={`w-12 h-0.5 rounded-full ${step >= 2 ? 'bg-green-600' : 'bg-gray-200'}`}></div>
+            <div className={`flex items-center gap-2 px-6 py-2 rounded-full font-bold text-sm transition-all ${step >= 2 ? 'bg-green-600 text-white shadow-lg shadow-green-100' : 'bg-white text-gray-400 border border-gray-100'}`}>
+              <LuCreditCard size={18} /> Payment
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+          {step === 1 ? (
+            <div className="p-8 md:p-12">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-green-600">
+                  <LuMapPin size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Shipping Details</h2>
+                  <p className="text-sm text-gray-400">Where should we deliver your order?</p>
+                </div>
               </div>
 
-              <div className="pt-4 flex items-center justify-between border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => navigate("/cart")}
-                  className="px-6 py-3 rounded-xl text-gray-500 font-bold hover:text-gray-900 transition"
-                >
-                  &larr; {lang === 'en' ? 'Return to Cart' : 'कार्ट पर वापस जाएं'}
-                </button>
-                <button
-                  type="submit"
-                  className="bg-emerald-900 text-white font-bold px-8 py-3.5 rounded-xl shadow-md hover:bg-black hover:shadow-lg transition-all focus:ring-4 focus:ring-gray-300"
-                >
-                  {lang === 'en' ? 'Continue to Summary' : 'सारांश पर जारी रखें'}
-                </button>
+              <form onSubmit={handleNextStep} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Street Address</label>
+                  <textarea
+                    required
+                    rows="3"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all font-medium resize-none"
+                    placeholder="Enter your full address"
+                    value={address.address}
+                    onChange={(e) => setAddress({ ...address, address: e.target.value })}
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">City</label>
+                    <input
+                      type="text" required placeholder="City"
+                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all font-medium"
+                      value={address.city}
+                      onChange={(e) => setAddress({ ...address, city: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">State</label>
+                    <input
+                      type="text" required placeholder="State"
+                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all font-medium"
+                      value={address.state}
+                      onChange={(e) => setAddress({ ...address, state: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Pincode</label>
+                    <input
+                      type="text" required placeholder="Pincode"
+                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all font-medium"
+                      value={address.pincode}
+                      onChange={(e) => setAddress({ ...address, pincode: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
+                    <input
+                      type="tel" required placeholder="Phone"
+                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all font-medium"
+                      value={address.phone}
+                      onChange={(e) => setAddress({ ...address, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-10 flex items-center justify-between border-t border-gray-50">
+                  <button type="button" onClick={() => navigate("/cart")} className="flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-green-600 transition-colors">
+                    <LuChevronLeft size={20} /> Back to Cart
+                  </button>
+                  <button type="submit" className="px-10 py-4 bg-green-600 text-white rounded-2xl font-bold shadow-lg shadow-green-100 hover:bg-green-700 transition-all flex items-center gap-2">
+                    Summary <LuArrowRight size={20} />
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="p-8 md:p-12">
+              <div className="flex items-center gap-4 mb-10">
+                <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-green-600">
+                  <LuShoppingBag size={24} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Order Summary</h2>
+                  <p className="text-sm text-gray-400">Review your order before payment</p>
+                </div>
               </div>
-            </form>
-          </div>
-        ) : (
-          <div>
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">{lang === 'en' ? 'Order Summary' : 'ऑर्डर सारांश'}</h2>
-            <p className="text-gray-500 mb-8">{lang === 'en' ? 'Please review your selections and destination before confirming payment.' : 'भुगतान की पुष्टि करने से पहले कृपया अपने चयन और गंतव्य की समीक्षा करें।'}</p>
-            
-            <div className="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100 mb-8 shadow-sm">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">{lang === 'en' ? 'Items Overview' : 'आइटम ओवरव्यू'}</h3>
-              <div className="space-y-3 max-h-48 overflow-y-auto pr-2 mb-6 scrollbar-thin scrollbar-thumb-emerald-200">
+
+              <div className="space-y-4 mb-10">
                 {cartItems.map(item => (
-                  <div key={item._id} className="flex justify-between items-center bg-white p-3 rounded-xl border border-gray-100">
-                    <div className="flex items-center space-x-3 truncate">
-                       <span className="font-bold text-emerald-800 bg-emerald-50 w-6 h-6 flex items-center justify-center rounded text-xs">{item.qty}x</span>
-                       <span className="text-gray-700 text-sm font-medium truncate">{item.name || item.product?.name || "Item"}</span>
+                  <div key={item._id} className="flex justify-between items-center bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                    <div className="flex items-center gap-4 truncate">
+                       <span className="font-bold text-green-600 bg-white border border-green-100 px-3 py-1 rounded-lg text-xs">{item.qty}x</span>
+                       <span className="text-gray-900 font-bold truncate">{item.name || "Product"}</span>
                     </div>
-                    <span className="font-bold text-gray-900">₹{(item.price || item.product?.price || 0) * item.qty}</span>
+                    <span className="font-bold text-gray-900">₹{((item.price || 0) * item.qty).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
-              
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 pt-4 border-t border-gray-200">{t.deliveredTo}</h3>
-              <p className="text-gray-800 font-medium text-sm leading-relaxed bg-white p-4 rounded-xl border border-gray-100">{address}</p>
-            </div>
 
-            <div className="border-t-2 border-dashed border-gray-200 pt-6 mb-8 flex justify-between items-end">
-               <div>
-                  <p className="text-gray-500 font-medium mb-1">{lang === 'en' ? 'Standard Delivery' : 'स्टैंडर्ड डिलीवरी'}</p>
-                  <p className="text-3xl font-black text-gray-900">{t.total}: <span className="text-emerald-700 drop-shadow-sm">₹{totalPrice}</span></p>
-               </div>
-            </div>
+              <div className="bg-gray-900 text-white p-8 rounded-3xl mb-10 space-y-4">
+                 <div className="flex justify-between text-gray-400 text-sm font-bold uppercase tracking-widest">
+                    <span>Shipping to</span>
+                    <button onClick={() => setStep(1)} className="text-green-400 hover:underline">Change</button>
+                 </div>
+                 <p className="text-sm font-medium leading-relaxed">
+                   {address.address}, {address.city}, {address.state} - {address.pincode}
+                 </p>
+                 <div className="pt-4 border-t border-white/10 flex justify-between items-end">
+                    <span className="text-sm text-gray-400 font-bold uppercase tracking-widest">Total Amount</span>
+                    <span className="text-3xl font-bold">₹{totalPrice.toLocaleString()}</span>
+                 </div>
+              </div>
 
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => setStep(1)}
-                className="px-6 py-3 rounded-xl text-gray-500 font-bold hover:text-gray-900 transition"
-              >
-                &larr; {lang === 'en' ? 'Edit Address' : 'पता बदलें'}
-              </button>
               <button
                 onClick={handlePlaceOrder}
                 disabled={loading}
-                className="bg-gradient-to-r from-emerald-600 to-green-500 text-white font-black px-10 py-4 rounded-xl shadow-lg hover:-translate-y-0.5 hover:shadow-xl hover:from-emerald-500 hover:to-emerald-400 focus:ring-4 focus:ring-emerald-500/50 disabled:opacity-70 disabled:cursor-not-allowed transition-all text-lg"
+                className="w-full py-5 bg-green-600 text-white rounded-2xl font-bold shadow-xl shadow-green-100 hover:bg-amber-500 hover:shadow-amber-100 transition-all text-lg flex items-center justify-center gap-3 disabled:opacity-50"
               >
-                {loading ? t.loading : t.confirmPay}
+                {loading ? <LuLoaderCircle className="animate-spin" size={24} /> : <>Pay Now <LuCircleCheck size={24} /></>}
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

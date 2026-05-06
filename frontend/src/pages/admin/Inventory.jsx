@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import API from "../../services/api";
-
-import { 
-  LuSearch as Search, 
-  LuPlus as Plus, 
-  LuMinus as Minus, 
-  LuRefreshCcw as RefreshCcw, 
-  LuTriangleAlert as AlertTriangle,
-  LuArrowUpDown as ArrowUpDown
+import {
+  LuSearch,
+  LuPlus,
+  LuMinus,
+  LuRefreshCcw,
+  LuTriangleAlert,
+  LuLoaderCircle,
+  LuPackageCheck
 } from "react-icons/lu";
 import toast from "react-hot-toast";
 
@@ -25,9 +25,9 @@ const AdminInventory = () => {
     try {
       const res = await API.get("/products");
       setProducts(res.data);
-      setLoading(false);
     } catch (err) {
       toast.error("Failed to fetch inventory");
+    } finally {
       setLoading(false);
     }
   };
@@ -38,115 +38,135 @@ const AdminInventory = () => {
     try {
       await API.put(`/admin/products/${id}`, { stock: newStock });
       setProducts(products.map(p => p._id === id ? { ...p, stock: newStock } : p));
-      toast.success("Stock updated");
+      toast.success("Stock updated successfully");
     } catch (err) {
-      toast.error("Update failed");
+      toast.error("Failed to update stock");
     } finally {
       setUpdating(null);
     }
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.category?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProducts = products.filter(p =>
+    p.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) return <div className="p-10 text-center font-bold text-emerald-700">Loading Inventory...</div>;
-
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-black text-gray-900">Inventory Management</h1>
-            <p className="text-gray-500 font-medium">Track and manage your stock levels</p>
-          </div>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search products..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-white border border-gray-100 rounded-2xl w-full focus:outline-none focus:ring-2 focus:ring-emerald-600 transition-all"
-              />
-            </div>
-            <button 
-              onClick={fetchInventory}
-              className="p-2 bg-white border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors"
-            >
-              <RefreshCcw size={18} className="text-gray-600" />
-            </button>
-          </div>
+    <div className="space-y-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Inventory Tracker</h1>
+          <p className="text-gray-500 font-medium mt-1">Monitor and adjust your warehouse stock.</p>
         </div>
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <div className="relative flex-1 md:w-72">
+            <LuSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-green-600 font-medium"
+            />
+          </div>
+          <button
+            onClick={fetchInventory}
+            className="p-3.5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:bg-gray-50 transition-all text-gray-500"
+            title="Refresh Inventory"
+          >
+            <LuRefreshCcw size={20} />
+          </button>
+        </div>
+      </div>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+            <LuLoaderCircle className="animate-spin text-green-600 mb-4" size={32} />
+            <p className="text-sm font-bold uppercase tracking-widest">Loading Stock...</p>
+          </div>
+        ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
-                <tr className="bg-gray-50 text-gray-500 text-xs font-black uppercase tracking-wider">
-                  <th className="px-8 py-4">Product Name</th>
-                  <th className="px-8 py-4">Category</th>
-                  <th className="px-8 py-4">Price</th>
-                  <th className="px-8 py-4">Stock Status</th>
-                  <th className="px-8 py-4 text-center">Update Stock</th>
+                <tr className="bg-gray-50/50 text-gray-400 text-xs font-bold uppercase tracking-widest">
+                  <th className="px-10 py-5">Product Info</th>
+                  <th className="px-10 py-5">Price</th>
+                  <th className="px-10 py-5">Status</th>
+                  <th className="px-10 py-5 text-center">Adjust Stock</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50 font-medium">
+              <tbody className="divide-y divide-gray-50">
                 {filteredProducts.map((p) => (
-                  <tr key={p._id} className="hover:bg-gray-50/50 transition-colors">
-                    <td className="px-8 py-5">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-gray-900">{p.name}</span>
-                        <span className="text-[10px] text-gray-400 font-bold uppercase">{p._id.slice(-6)}</span>
+                  <tr key={p._id} className="hover:bg-gray-50/50 transition-colors group">
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
+                          <img src={p.images?.[0] || '/placeholder.png'} className="w-full h-full object-cover" alt="" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 leading-tight">{p.name}</p>
+                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: {p._id.slice(-8).toUpperCase()}</p>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-8 py-5">
-                      <span className="text-sm text-gray-600">{p.category?.name || "Uncategorized"}</span>
+                    <td className="px-10 py-6">
+                      <span className="font-bold text-gray-900 text-sm">₹{p.variants?.[0]?.price?.toLocaleString() || 0}</span>
                     </td>
-                    <td className="px-8 py-5 text-sm font-bold text-gray-900">
-                      ₹{p.variants?.[0]?.price || 0}
-                    </td>
-                    <td className="px-8 py-5">
+                    <td className="px-10 py-6">
                       <div className="flex items-center gap-2">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                          p.stock < 10 ? 'bg-red-100 text-red-700' : 'bg-green-100 text-emerald-700'
-                        }`}>
-                          {p.stock} in stock
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${p.stock < 10 ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-700 border border-green-100'
+                          }`}>
+                          {p.stock} units
                         </span>
-                        {p.stock < 10 && <AlertTriangle size={14} className="text-red-500 animate-pulse" />}
+                        {p.stock < 10 && <LuTriangleAlert size={14} className="text-amber-500 animate-bounce" />}
                       </div>
                     </td>
-                    <td className="px-8 py-5">
-                      <div className="flex items-center justify-center gap-4">
-                        <button 
+                    <td className="px-10 py-6">
+                      <div className="flex items-center justify-center gap-6">
+                        <button
                           onClick={() => handleUpdateStock(p._id, p.stock, -1)}
                           disabled={updating === p._id}
-                          className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-red-100 hover:text-red-600 transition-colors"
+                          className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-red-50 hover:text-red-600 transition-all shadow-sm active:scale-90"
                         >
-                          <Minus size={16} />
+                          <LuMinus size={18} />
                         </button>
-                        <span className="w-8 text-center font-black text-gray-900">{p.stock}</span>
-                        <button 
+                        <span className="w-10 text-center font-bold text-gray-900 text-lg">{p.stock}</span>
+                        <button
                           onClick={() => handleUpdateStock(p._id, p.stock, 1)}
                           disabled={updating === p._id}
-                          className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center hover:bg-green-100 hover:text-emerald-600 transition-colors"
+                          className="w-10 h-10 rounded-xl bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-green-50 hover:text-green-600 transition-all shadow-sm active:scale-90"
                         >
-                          <Plus size={16} />
+                          <LuPlus size={18} />
                         </button>
                       </div>
                     </td>
                   </tr>
                 ))}
+                {filteredProducts.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="py-20 text-center text-gray-400 font-bold uppercase tracking-widest text-sm">
+                      No matching products
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
-          {filteredProducts.length === 0 && (
-            <div className="p-20 text-center text-gray-500 font-medium">No products found matching your search.</div>
-          )}
-        </div>
+        )}
       </div>
 
+      <div className="bg-gray-900 rounded-[40px] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl shadow-gray-200">
+        <div className="space-y-2 text-center md:text-left">
+          <h3 className="text-2xl font-bold flex items-center justify-center md:justify-start gap-3">
+            <LuPackageCheck className="text-green-500" /> Warehouse Optimization
+          </h3>
+          <p className="text-gray-400 font-medium">Keep your inventory lean and respond faster to customer demand.</p>
+        </div>
+        <button className="px-8 py-4 bg-green-600 text-white rounded-2xl font-bold shadow-xl shadow-green-900/40 hover:bg-green-700 transition-all active:scale-95 whitespace-nowrap">
+          Generate Audit Report
+        </button>
+      </div>
+    </div>
   );
 };
 

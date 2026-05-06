@@ -9,6 +9,12 @@ const {
 } = require("../controllers/admin.controller");
 
 const {
+  createProduct,
+  updateProduct,
+  deleteProduct
+} = require("../controllers/product.controller");
+
+const {
   getAllSuppliers,
   createSupplier,
   updateSupplier,
@@ -28,6 +34,11 @@ router.put("/orders/:id", auth, isAdmin, updateOrderStatus);
 
 // User Management
 router.get("/users", auth, isAdmin, getAllUsers);
+
+// Product Management
+router.post("/products", auth, isAdmin, createProduct);
+router.put("/products/:id", auth, isAdmin, updateProduct);
+router.delete("/products/:id", auth, isAdmin, deleteProduct);
 
 // Supplier Management
 router.get("/suppliers", auth, isAdmin, getAllSuppliers);
