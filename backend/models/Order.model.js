@@ -9,26 +9,37 @@ const orderItemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  variant: {
-    type: {
-      type: String,
-      required: true
-    },
-    price: {
-      type: Number,
-      required: true
-    },
-    costPrice: {
-      type: Number,
-      default: 0
-    },
-    unit: String
+  image: String,
+  price: {
+    type: Number,
+    required: true
   },
   quantity: {
     type: Number,
-    required: true
+    required: true,
+    min: 1
   }
 });
+
+const addressSchema = new mongoose.Schema({
+  address: { type: String, required: true },
+  city:    { type: String, required: true },
+  state:   { type: String, required: true },
+  pincode: { type: String, required: true },
+  phone:   { type: String, required: true }
+}, { _id: false });
+
+// 📦 Full order lifecycle status
+const ORDER_STATUSES = [
+  "pending",
+  "confirmed",
+  "packed",
+  "shipped",
+  "out_for_delivery",
+  "delivered",
+  "cancelled",
+  "returned"
+];
 
 const orderSchema = new mongoose.Schema(
   {
@@ -47,28 +58,55 @@ const orderSchema = new mongoose.Schema(
 
     deliveryCharge: {
       type: Number,
-      default: 0
+      default: 40
     },
 
     shippingAddress: {
-      address: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      pincode: { type: String, required: true },
-      phone: { type: String, required: true }
+      type: addressSchema,
+      required: true
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["cod", "razorpay", "upi"],
+      default: "cod"
     },
 
     paymentStatus: {
       type: String,
-      enum: ["pending", "paid", "failed"],
+      enum: ["pending", "paid", "failed", "refunded"],
       default: "pending"
     },
 
     orderStatus: {
       type: String,
-      enum: ["processing", "shipped", "delivered", "cancelled"],
-      default: "processing"
-    }
+      enum: ORDER_STATUSES,
+      default: "pending"
+    },
+
+    // 📍 Admin-assigned tracking
+    trackingId: {
+      type: String,
+      default: null
+    },
+
+    // 🚚 Status history timeline
+    statusHistory: [{
+      status: { type: String, enum: ORDER_STATUSES },
+      timestamp: { type: Date, default: Date.now },
+      note: String
+    }],
+
+    // ❌ Cancellation / Return
+    cancelReason: String,
+    returnReason: String,
+
+    // 💳 Razorpay payment info (for future)
+    razorpayOrderId: String,
+    razorpayPaymentId: String,
+
+    // 📅 Expected delivery date
+    estimatedDelivery: Date,
   },
   { timestamps: true }
 );

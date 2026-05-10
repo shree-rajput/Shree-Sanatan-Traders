@@ -2,19 +2,21 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 import { LuShoppingCart, LuMenu, LuX, LuUser, LuShoppingBag } from "react-icons/lu";
 import LanguageToggle from "./LanguageToggle";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Products", path: "/products" },
-    { name: "Orders", path: "/orders" },
+    { name: t("home"), path: "/" },
+    { name: t("shop") || "Products", path: "/products" },
+    { name: t("my_orders"), path: "/orders" },
   ];
 
   return (
@@ -61,12 +63,12 @@ const Navbar = () => {
                   onClick={logout}
                   className="text-xs font-bold text-gray-400 hover:text-red-500 uppercase tracking-widest"
                 >
-                  Logout
+                  {t("sign_out")}
                 </button>
               </div>
             ) : (
               <Link to="/login" className="text-sm font-bold text-green-600 hover:text-amber-600 transition-colors">
-                Login
+                {t("login")}
               </Link>
             )}
 

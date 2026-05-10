@@ -6,13 +6,15 @@ const AdminRoute = ({ children }) => {
   const { user } = useAuth();
   const location = useLocation();
 
-  // if (!user) {
-  //   return <Navigate to="/login" state={{ from: location }} replace/>;
-  // }
+  // 🔒 Must be logged in
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
 
-  // if (user.role !== 'admin') {
-  //   return <Navigate to="/" replace />; // Redirect simple users to Home instantly instead of 404
-  // }
+  // 🔒 Must be an admin
+  if (user.role !== 'admin') {
+    return <Navigate to="/" replace />;
+  }
 
   return children;
 };

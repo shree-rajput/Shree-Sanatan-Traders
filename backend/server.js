@@ -27,14 +27,27 @@ const app = express();
 
 // 🔹 Middlewares
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+  credentials: true
+}));
 app.use(morgan("dev"));
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// 🔹 Rate limiting — protect auth endpoints
+const rateLimit = require("express-rate-limit");
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  message: { message: "Too many attempts. Please try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // 🔹 Routes
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
@@ -45,11 +58,18 @@ app.use("/api/admin", adminRoutes);
 
 // 🔹 Root
 app.get("/", (req, res) => {
-  res.json({ message: "Shree Sanatan Traders API Running!" });
+  res.json({ message: "Shree Sanatan Traders API Running! 🌾" });
+});
+
+// 🔹 Global error handler
+app.use((err, req, res, next) => {
+  console.error("🔥 Unhandled Error:", err.message);
+  res.status(500).json({ message: "Internal server error" });
 });
 
 // 🔹 Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📧 Email configured: ${process.env.EMAIL_USER ? "✅" : "❌ (add EMAIL_USER to .env)"}`);
 });

@@ -1,23 +1,33 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
+// ✅ Synchronous hydration from localStorage — prevents ProtectedRoute redirect flash
+const getInitialUser = () => {
+  try {
+    const stored = localStorage.getItem("user");
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+const getInitialToken = () => {
+  return localStorage.getItem("token") || null;
+};
+
+export const AuthProvider = ({ children }) => {
+  // 🔑 Initialize synchronously — no useEffect delay
+  const [user, setUser] = useState(getInitialUser);
+  const [token, setToken] = useState(getInitialToken);
 
   const login = (userData, authToken) => {
-    setUser(userData);
+    // Remove password from stored data
+    const { password, ...safeUser } = userData;
+    setUser(safeUser);
     setToken(authToken);
     localStorage.setItem("token", authToken);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(safeUser));
   };
 
   const logout = () => {
@@ -25,10 +35,14 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("cart");
   };
 
+  // ✅ Helper: check if user is admin
+  const isAdmin = user?.role === "admin";
+
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

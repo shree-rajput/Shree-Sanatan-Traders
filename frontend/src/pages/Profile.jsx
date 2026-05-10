@@ -22,13 +22,21 @@ const Profile = () => {
     const fetchProfileData = async () => {
       try {
         const res = await API.get("/orders");
-        setOrders(res.data);
+
+        setOrders(
+          Array.isArray(res.data)
+            ? res.data
+            : res.data.orders || []
+        );
+
       } catch (err) {
         console.error("Failed to fetch data");
+        setOrders([]);
       } finally {
         setLoading(false);
       }
     };
+
     if (user) fetchProfileData();
   }, [user]);
 
@@ -60,7 +68,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-50/50 py-12 px-6">
       <div className="max-w-6xl mx-auto">
-        
+
         <div className="mb-10">
           <h1 className="text-3xl font-bold text-gray-900">My <span className="text-green-600">Account</span></h1>
           <p className="text-gray-400 font-medium mt-1">Manage your profile and orders</p>
@@ -75,7 +83,7 @@ const Profile = () => {
               </div>
               <h2 className="text-xl font-bold text-gray-900">{user?.name}</h2>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{user?.role || "Customer"}</p>
-              
+
               <div className="mt-8 pt-8 border-t border-gray-50 grid grid-cols-2 gap-4">
                 <div className="text-center">
                   <p className="text-lg font-bold text-gray-900">{orders.length}</p>
@@ -93,9 +101,8 @@ const Profile = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold transition-all ${
-                    activeTab === tab.id ? "bg-green-600 text-white shadow-lg shadow-green-100" : "text-gray-400 hover:text-green-600 hover:bg-gray-50"
-                  }`}
+                  className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold transition-all ${activeTab === tab.id ? "bg-green-600 text-white shadow-lg shadow-green-100" : "text-gray-400 hover:text-green-600 hover:bg-gray-50"
+                    }`}
                 >
                   <tab.icon size={18} />
                   {tab.name}
@@ -181,9 +188,8 @@ const Profile = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                          order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                        }`}>
+                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
+                          }`}>
                           {order.paymentStatus || 'Pending'}
                         </span>
                         <LuChevronRight size={20} className="text-gray-300" />
@@ -193,12 +199,12 @@ const Profile = () => {
                 )}
               </div>
             )}
-            
+
             {activeTab === "settings" && (
               <div className="bg-white rounded-3xl p-12 border border-gray-100 shadow-sm text-center">
-                 <LuSettings size={48} className="mx-auto text-gray-200 mb-6" />
-                 <h2 className="text-xl font-bold text-gray-900 mb-2">Account Settings</h2>
-                 <p className="text-gray-500 mb-8">Security and preference settings are coming soon.</p>
+                <LuSettings size={48} className="mx-auto text-gray-200 mb-6" />
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Account Settings</h2>
+                <p className="text-gray-500 mb-8">Security and preference settings are coming soon.</p>
               </div>
             )}
           </main>
