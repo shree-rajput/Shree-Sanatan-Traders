@@ -34,6 +34,14 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user"
     },
+    isBanned: {
+      type: Boolean,
+      default: false
+    },
+    lastLogin: {
+      type: Date
+    },
+    permissions: [String],
 
     // 🌾 Agricultural / Business Details
     userType: {
@@ -57,7 +65,10 @@ const userSchema = new mongoose.Schema(
     notificationSettings: {
       lowStock: { type: Boolean, default: true },
       newOrders: { type: Boolean, default: true },
-      weeklyReport: { type: Boolean, default: false }
+      weeklyReport: { type: Boolean, default: false },
+      promotions: { type: Boolean, default: false },
+      smsAlerts: { type: Boolean, default: false },
+      emailAlerts: { type: Boolean, default: true }
     },
     isSetupComplete: {
       type: Boolean,
@@ -107,7 +118,64 @@ businessDescription: {
 
 gstNumber: {
   type: String,
+  default: "",
+  trim: true,
+  uppercase: true
+},
+
+businessBanner: {
+  type: String,
   default: ""
+},
+
+farmingType: {
+  type: String,
+  default: ""
+},
+
+soilType: {
+  type: String,
+  default: ""
+},
+
+businessAddress: {
+  type: String,
+  default: ""
+},
+
+currency: {
+  type: String,
+  enum: ["INR", "USD", "EUR"],
+  default: "INR"
+},
+
+theme: {
+  type: String,
+  enum: ["light"],
+  default: "light"
+},
+
+emailPreferences: {
+  orderUpdates: { type: Boolean, default: true },
+  offers: { type: Boolean, default: false },
+  newsletter: { type: Boolean, default: false }
+},
+
+accountVisibility: {
+  type: String,
+  enum: ["private", "marketplace", "public"],
+  default: "private"
+},
+
+profileCompletion: {
+  type: Number,
+  min: 0,
+  max: 100,
+  default: 0
+},
+
+lastPasswordChanged: {
+  type: Date
 },
 
 upiId: {

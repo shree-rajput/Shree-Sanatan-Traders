@@ -16,6 +16,7 @@ const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const userRoutes = require("./routes/user.routes");
+const profileRoutes = require("./routes/profile.routes");
 const adminRoutes = require("./routes/admin.routes");
 const addressRoutes = require("./routes/address.routes");
 
@@ -50,6 +51,7 @@ const authLimiter = rateLimit({
 // 🔹 Routes
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/profile", profileRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
@@ -57,6 +59,16 @@ app.use("/api/categories", require("./routes/category.routes"));
 app.use("/api/payment", paymentRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/admin/dashboard-v2", require("./routes/admin/dashboard.routes"));
+app.use("/api/admin/analytics", require("./routes/admin/analytics.routes"));
+app.use("/api/admin/inventory", require("./routes/admin/inventory.routes"));
+app.use("/api/admin/notifications", require("./routes/admin/notification.routes"));
+app.use("/api/admin/orders-v2", require("./routes/admin/order.routes"));
+app.use("/api/admin/users-v2", require("./routes/admin/user.routes"));
+app.use("/api/admin/products-v2", require("./routes/admin/product.routes"));
+app.use("/api/admin/coupons", require("./routes/admin/coupon.routes"));
+app.use("/api/admin/reviews", require("./routes/admin/review.routes"));
+app.use("/api/admin/support", require("./routes/admin/support.routes"));
 
 // 🔹 Root
 app.get("/", (req, res) => {

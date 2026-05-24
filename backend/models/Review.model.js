@@ -15,7 +15,12 @@ const reviewSchema = new mongoose.Schema(
       min: 1,
       max: 5
     },
-    comment: String
+    comment: String,
+    status: {
+      type: String,
+      enum: ["pending", "approved", "spam"],
+      default: "pending"
+    }
   },
   { timestamps: true }
 );

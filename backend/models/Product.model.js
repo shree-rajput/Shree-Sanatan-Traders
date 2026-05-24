@@ -16,7 +16,12 @@ const variantSchema = new mongoose.Schema({
   unit: {
     type: String, // "kg", "piece", "meter roll"
     required: true
-  }
+  },
+  sku: String,
+  barcode: String,
+  stock: { type: Number, default: 0, min: 0 },
+  reservedStock: { type: Number, default: 0, min: 0 },
+  lowStockThreshold: { type: Number, default: 5, min: 0 }
 });
 
 const productSchema = new mongoose.Schema(
@@ -46,6 +51,35 @@ const productSchema = new mongoose.Schema(
       default: 0,
       min: 0
     },
+    reservedStock: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    soldStock: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    sku: {
+      type: String,
+      trim: true,
+      index: true
+    },
+    barcode: {
+      type: String,
+      trim: true
+    },
+    lowStockThreshold: {
+      type: Number,
+      default: 5,
+      min: 0
+    },
+    supplier: {
+      name: String,
+      phone: String,
+      email: String
+    },
 
     // 🏷️ Stock status — auto-computed
     stockStatus: {
@@ -61,6 +95,29 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    trending: {
+      type: Boolean,
+      default: false
+    },
+    status: {
+      type: String,
+      enum: ["draft", "active", "archived"],
+      default: "active"
+    },
+    brand: {
+      type: String,
+      default: ""
+    },
+    tags: [String],
+    subcategory: {
+      type: String,
+      default: ""
+    },
+    seo: {
+      title: String,
+      description: String,
+      keywords: [String]
+    },
 
     // 📊 For sorting/analytics
     soldCount: {
@@ -75,7 +132,7 @@ const productSchema = new mongoose.Schema(
 productSchema.pre("save", function (next) {
   if (this.stock === 0) {
     this.stockStatus = "out_of_stock";
-  } else if (this.stock <= 5) {
+  } else if (this.stock <= (this.lowStockThreshold ?? 5)) {
     this.stockStatus = "low_stock";
   } else {
     this.stockStatus = "in_stock";

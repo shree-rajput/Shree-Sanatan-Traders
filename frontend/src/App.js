@@ -35,16 +35,20 @@ const ReturnsRefunds = lazy(() => import("./pages/support/ReturnsRefunds"));
 const BulkOrders = lazy(() => import("./pages/support/BulkOrders"));
 const ContactUs = lazy(() => import("./pages/support/ContactUs"));
 
-const AdminDashboard = lazy(() => import("./pages/admin/Dashboard"));
-const AdminProducts = lazy(() => import("./pages/admin/Products"));
-const AdminInventory = lazy(() => import("./pages/admin/Inventory"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminProducts = lazy(() => import("./pages/admin/AdminProducts"));
+const AdminInventory = lazy(() => import("./pages/admin/AdminInventory"));
 const AdminBilling = lazy(() => import("./pages/admin/Billing"));
-const AdminOrders = lazy(() => import("./pages/admin/Orders"));
+const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminCustomers = lazy(() => import("./pages/admin/Customers"));
 const AdminSuppliers = lazy(() => import("./pages/admin/Suppliers"));
-const AdminReports = lazy(() => import("./pages/admin/Reports"));
-const AdminSettings = lazy(() => import("./pages/admin/Settings"));
-const AdminUsers = lazy(() => import("./pages/admin/Users"));
+const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
+const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
+const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
+const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
+const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
+const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 
 function App() {
   return (
@@ -105,7 +109,12 @@ function App() {
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="customers" element={<AdminCustomers />} />
                     <Route path="suppliers" element={<AdminSuppliers />} />
-                    <Route path="reports" element={<AdminReports />} />
+                    <Route path="reports" element={<AdminAnalytics />} />
+                    <Route path="analytics" element={<AdminAnalytics />} />
+                    <Route path="notifications" element={<AdminNotifications />} />
+                    <Route path="coupons" element={<AdminCoupons />} />
+                    <Route path="reviews" element={<AdminReviews />} />
+                    <Route path="support" element={<AdminSupport />} />
                     <Route path="settings" element={<AdminSettings />} />
                     <Route path="users" element={<AdminUsers />} />
                   </Route>

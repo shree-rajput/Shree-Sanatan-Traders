@@ -24,7 +24,7 @@ exports.updateProfile = async (req, res) => {
       name, email, phone, avatar,
       userType, landSize, crops, irrigation, 
       shopName, businessType, address, website, notificationSettings,
-      language, isSetupComplete  , bio,
+      isSetupComplete  , bio,
 gender,
 dob,
 occupation,

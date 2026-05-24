@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
 
 const AuthContext = createContext();
 
@@ -21,22 +21,22 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(getInitialUser);
   const [token, setToken] = useState(getInitialToken);
 
-  const login = (userData, authToken) => {
+  const login = useCallback((userData, authToken) => {
     // Remove password from stored data
     const { password, ...safeUser } = userData;
     setUser(safeUser);
     setToken(authToken);
     localStorage.setItem("token", authToken);
     localStorage.setItem("user", JSON.stringify(safeUser));
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("cart");
-  };
+  }, []);
 
   // ✅ Helper: check if user is admin
   const isAdmin = user?.role === "admin";
