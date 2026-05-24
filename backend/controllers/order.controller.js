@@ -12,8 +12,8 @@ exports.placeOrder = async (req, res) => {
     if (!items || items.length === 0) {
       return res.status(400).json({ message: "No items in order" });
     }
-    if (!shippingAddress || !shippingAddress.address || !shippingAddress.city ||
-        !shippingAddress.state || !shippingAddress.pincode || !shippingAddress.phone) {
+    if (!shippingAddress || !shippingAddress.houseNo || !shippingAddress.area || !shippingAddress.city ||
+        !shippingAddress.state || !shippingAddress.pincode || !shippingAddress.mobileNumber) {
       return res.status(400).json({ message: "Complete shipping address is required" });
     }
 
@@ -198,7 +198,32 @@ exports.updateOrderStatus = async (req, res) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    const oldStatus = order.orderStatus;
     order.orderStatus = status;
+
+    // ✅ Handle Stock Restoration on Cancellation/Return
+    const restoredStatuses = ["cancelled", "returned"];
+    const wasAlreadyRestored = restoredStatuses.includes(oldStatus);
+    
+    if (restoredStatuses.includes(status) && !wasAlreadyRestored) {
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity, soldCount: -item.quantity }
+        });
+      }
+    }
+    
+    // ✅ Re-deduct stock if moved back from Cancelled to active status
+    if (wasAlreadyRestored && !restoredStatuses.includes(status)) {
+       for (const item of order.items) {
+          const prod = await Product.findById(item.product);
+          if (prod) {
+             prod.stock -= item.quantity;
+             prod.soldCount += item.quantity;
+             await prod.save();
+          }
+       }
+    }
 
     // Auto update payment status on delivery with COD
     if (status === "delivered" && order.paymentMethod === "cod") {

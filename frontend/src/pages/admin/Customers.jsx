@@ -47,15 +47,14 @@ const AdminCustomers = () => {
   }
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-
+    <div className="space-y-8 animate-in fade-in duration-500 min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h1 className="text-3xl font-black text-gray-900">
+            <h1 className="text-3xl font-black text-gray-900 dark:text-white">
               Customer Management
             </h1>
-            <p className="text-gray-500 font-medium">
+            <p className="text-gray-500 dark:text-gray-400 font-medium">
               Track purchases and manage credit (Udhaar)
             </p>
           </div>
@@ -65,7 +64,7 @@ const AdminCustomers = () => {
             <input
               type="text"
               placeholder="Search name or phone..."
-              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-100 rounded-2xl focus:ring-2 focus:ring-emerald-600 font-medium"
+              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl focus:ring-2 focus:ring-emerald-600 font-medium dark:text-white outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -74,99 +73,101 @@ const AdminCustomers = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
+            <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
               Total Customers
             </p>
-            <p className="text-2xl font-black text-gray-900">
+            <p className="text-2xl font-black text-gray-900 dark:text-white">
               {customers.length}
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
+            <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
               Total Credit Given
             </p>
-            <p className="text-2xl font-black text-red-600">
+            <p className="text-2xl font-black text-red-600 dark:text-red-400">
               ₹{customers.reduce((sum, c) => sum + c.creditBalance, 0).toLocaleString()}
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
+            <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
               Active This Month
             </p>
-            <p className="text-2xl font-black text-emerald-700">84%</p>
+            <p className="text-2xl font-black text-emerald-700 dark:text-emerald-500">84%</p>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
+            <p className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
               New Customers
             </p>
-            <p className="text-2xl font-black text-blue-700">+12</p>
+            <p className="text-2xl font-black text-blue-700 dark:text-blue-500">+12</p>
           </div>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="bg-gray-50 text-gray-500 text-xs font-black uppercase tracking-wider">
-                <th className="px-8 py-4">Customer</th>
-                <th className="px-8 py-4">Contact</th>
-                <th className="px-8 py-4">Total Purchases</th>
-                <th className="px-8 py-4">Credit Balance</th>
-                <th className="px-8 py-4 text-right">Actions</th>
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-50">
-              {filtered.map((c, i) => (
-                <tr key={i} className="hover:bg-gray-50/50 transition-colors">
-
-                  <td className="px-8 py-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-green-100 text-emerald-700 flex items-center justify-center font-black">
-                        {c.name?.[0]}
-                      </div>
-                      <span className="font-bold text-gray-900">
-                        {c.name}
-                      </span>
-                    </div>
-                  </td>
-
-                  <td className="px-8 py-5 font-medium text-gray-600">
-                    {c.phone || "No phone"}
-                  </td>
-
-                  <td className="px-8 py-5 font-black text-gray-900">
-                    ₹{c.totalSpent.toLocaleString()}
-                  </td>
-
-                  <td className="px-8 py-5">
-                    <span className={`font-black ${c.creditBalance > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
-                      ₹{c.creditBalance.toLocaleString()}
-                    </span>
-                  </td>
-
-                  <td className="px-8 py-5 text-right">
-                    <div className="flex justify-end gap-2">
-                      <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl">
-                        <History size={18} />
-                      </button>
-                      <button className="p-2 text-emerald-700 hover:bg-green-50 rounded-xl">
-                        <Wallet size={18} />
-                      </button>
-                    </div>
-                  </td>
-
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-gray-50 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 text-xs font-black uppercase tracking-wider">
+                  <th className="px-8 py-4">Customer</th>
+                  <th className="px-8 py-4">Contact</th>
+                  <th className="px-8 py-4">Total Purchases</th>
+                  <th className="px-8 py-4">Credit Balance</th>
+                  <th className="px-8 py-4 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                {filtered.map((c, i) => (
+                  <tr key={i} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors">
+
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 text-emerald-700 dark:text-green-400 flex items-center justify-center font-black">
+                          {c.name?.[0]}
+                        </div>
+                        <span className="font-bold text-gray-900 dark:text-white">
+                          {c.name}
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-8 py-5 font-medium text-gray-600 dark:text-gray-400">
+                      {c.phone || "No phone"}
+                    </td>
+
+                    <td className="px-8 py-5 font-black text-gray-900 dark:text-white">
+                      ₹{c.totalSpent.toLocaleString()}
+                    </td>
+
+                    <td className="px-8 py-5">
+                      <span className={`font-black ${c.creditBalance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-500'}`}>
+                        ₹{c.creditBalance.toLocaleString()}
+                      </span>
+                    </td>
+
+                    <td className="px-8 py-5 text-right">
+                      <div className="flex justify-end gap-2">
+                        <button className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-colors">
+                          <History size={18} />
+                        </button>
+                        <button className="p-2 text-emerald-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-xl transition-colors">
+                          <Wallet size={18} />
+                        </button>
+                      </div>
+                    </td>
+
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {filtered.length === 0 && (
-            <div className="p-20 text-center text-gray-500 font-medium italic">
+            <div className="p-20 text-center text-gray-500 dark:text-gray-600 font-medium italic">
               No customers found.
             </div>
           )}

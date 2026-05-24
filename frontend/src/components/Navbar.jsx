@@ -3,13 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useLanguage } from "../context/LanguageContext";
-import { LuShoppingCart, LuMenu, LuX, LuUser, LuShoppingBag } from "react-icons/lu";
+import { useTheme } from "../context/ThemeContext";
+import { LuShoppingCart, LuMenu, LuX, LuUser, LuShoppingBag, LuSun, LuMoon } from "react-icons/lu";
 import LanguageToggle from "./LanguageToggle";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const { t } = useLanguage();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -22,7 +24,7 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm transition-all">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        
+
         {/* Logo */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 group">
@@ -50,7 +52,7 @@ const Navbar = () => {
               {link.name}
             </Link>
           ))}
-          
+
           <div className="flex items-center gap-6 ml-4 border-l pl-8 border-gray-100">
             {/* User */}
             {user ? (
@@ -59,7 +61,7 @@ const Navbar = () => {
                   <LuUser size={18} className="text-green-600" />
                   {user.name}
                 </Link>
-                <button 
+                <button
                   onClick={logout}
                   className="text-xs font-bold text-gray-400 hover:text-red-500 uppercase tracking-widest"
                 >
@@ -95,7 +97,7 @@ const Navbar = () => {
               </span>
             )}
           </Link>
-          <button 
+          <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 text-gray-600 hover:bg-gray-50 rounded-xl"
           >

@@ -11,7 +11,9 @@ import {
   LuCircleAlert,   // ✅ correct
   LuCircleCheck    // ✅ correct
 } from "react-icons/lu";
-import toast from "react-hot-toast"; const AdminProducts = () => {
+import toast from "react-hot-toast";
+
+const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -108,11 +110,11 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
   const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Product Catalog</h1>
-          <p className="text-gray-500 font-medium mt-1">Manage your inventory and stock levels.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Product Catalog</h1>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Manage your inventory and stock levels.</p>
         </div>
         <div className="flex gap-4 w-full md:w-auto">
           <div className="relative flex-1 md:w-72">
@@ -120,14 +122,14 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
             <input
               type="text"
               placeholder="Search products..."
-              className="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-2xl shadow-sm focus:ring-2 focus:ring-green-600 font-medium"
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm focus:ring-2 focus:ring-green-600 font-medium dark:text-white outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button
+            <button
             onClick={() => { setShowModal(true); setEditingProduct(null); }}
-            className="bg-green-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-green-100 hover:bg-green-700 transition-all whitespace-nowrap"
+            className="bg-green-600 text-white px-8 py-3 rounded-2xl font-bold flex items-center gap-2 shadow-lg shadow-green-100/50 dark:shadow-none hover:bg-green-700 transition-all whitespace-nowrap"
           >
             <LuPlus size={20} />
             New Product
@@ -135,11 +137,11 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gray-50/50 text-gray-400 text-xs font-bold uppercase tracking-widest">
+              <tr className="bg-gray-50/50 dark:bg-gray-800/30 text-gray-400 dark:text-gray-500 text-xs font-bold uppercase tracking-widest">
                 <th className="px-10 py-5">Product Details</th>
                 <th className="px-10 py-5">Status</th>
                 <th className="px-10 py-5">Stock</th>
@@ -147,17 +149,17 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                 <th className="px-10 py-5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
               {filtered.map((p) => (
-                <tr key={p._id} className="hover:bg-gray-50/50 transition-colors group">
+                <tr key={p._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group">
                   <td className="px-10 py-6">
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 bg-gray-50 rounded-xl overflow-hidden border border-gray-100 flex-shrink-0">
+                      <div className="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-700 flex-shrink-0">
                         <img src={p.images?.[0] || '/placeholder.png'} alt={p.name} className="w-full h-full object-cover" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900 leading-tight">{p.name}</h4>
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">ID: {p._id.slice(-8).toUpperCase()}</p>
+                        <h4 className="font-bold text-gray-900 dark:text-white leading-tight">{p.name}</h4>
+                        <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mt-1">ID: {p._id.slice(-8).toUpperCase()}</p>
                       </div>
                     </div>
                   </td>
@@ -173,17 +175,17 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                     )}
                   </td>
                   <td className="px-10 py-6">
-                    <span className={`text-sm font-bold ${p.stock < 10 ? 'text-amber-600' : 'text-gray-900'}`}>
+                    <span className={`text-sm font-bold ${p.stock < 10 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-900 dark:text-white'}`}>
                       {p.stock} units
                     </span>
                   </td>
-                  <td className="px-10 py-6 font-bold text-gray-900">
+                  <td className="px-10 py-6 font-bold text-gray-900 dark:text-white">
                     ₹{p.variants?.[0]?.price?.toLocaleString() || 0}
                   </td>
                   <td className="px-10 py-6 text-right">
                     <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => handleEdit(p)} className="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition-colors" title="Edit"><LuPencil size={18} /></button>
-                      <button onClick={() => handleDelete(p._id)} className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="Delete"><LuTrash2 size={18} /></button>
+                      <button onClick={() => handleEdit(p)} className="p-2.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-colors" title="Edit"><LuPencil size={18} /></button>
+                      <button onClick={() => handleDelete(p._id)} className="p-2.5 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors" title="Delete"><LuTrash2 size={18} /></button>
                     </div>
                   </td>
                 </tr>
@@ -191,7 +193,7 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
             </tbody>
           </table>
           {filtered.length === 0 && !loading && (
-            <div className="py-20 text-center text-gray-400 font-bold uppercase tracking-widest text-sm">
+            <div className="py-20 text-center text-gray-400 dark:text-gray-600 font-bold uppercase tracking-widest text-sm">
               No products found
             </div>
           )}
@@ -199,11 +201,11 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-          <div className="bg-white rounded-[40px] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-            <div className="p-8 md:p-10 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white rounded-full transition-colors"><LuX size={24} /></button>
+        <div className="fixed inset-0 bg-gray-900/60 dark:bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+          <div className="bg-white dark:bg-gray-900 rounded-[40px] w-full max-w-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 border border-transparent dark:border-gray-800">
+            <div className="p-8 md:p-10 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/30">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">{editingProduct ? 'Edit Product' : 'Add New Product'}</h2>
+              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-white dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400"><LuX size={24} /></button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-8 md:p-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
@@ -214,7 +216,7 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                     type="text"
                     required
                     placeholder="Enter product name"
-                    className="w-full px-5 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800 border-transparent dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all dark:text-white outline-none"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   />
@@ -225,7 +227,7 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                     type="number"
                     required
                     placeholder="0.00"
-                    className="w-full px-5 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all font-bold"
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800 border-transparent dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all font-bold dark:text-white outline-none"
                     value={formData.price}
                     onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                   />
@@ -236,7 +238,7 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                     type="number"
                     required
                     placeholder="0"
-                    className="w-full px-5 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all font-bold"
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800 border-transparent dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all font-bold dark:text-white outline-none"
                     value={formData.stock}
                     onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                   />
@@ -246,7 +248,7 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                   <textarea
                     rows="3"
                     placeholder="Describe the product features..."
-                    className="w-full px-5 py-4 bg-gray-50 border-transparent rounded-2xl focus:bg-white focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all resize-none"
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-800 border-transparent dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all resize-none dark:text-white outline-none"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   ></textarea>
@@ -264,14 +266,14 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                     />
                     <label
                       htmlFor="image-upload"
-                      className="w-full flex items-center justify-center gap-4 px-6 py-8 bg-gray-50 border-2 border-dashed border-gray-200 rounded-3xl cursor-pointer hover:bg-green-50 hover:border-green-300 transition-all group"
+                      className="w-full flex items-center justify-center gap-4 px-6 py-8 bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-3xl cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/10 hover:border-green-300 dark:hover:border-green-800 transition-all group"
                     >
-                      <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gray-400 group-hover:text-green-600 shadow-sm transition-colors">
+                      <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-2xl flex items-center justify-center text-gray-400 dark:text-gray-500 group-hover:text-green-600 dark:group-hover:text-green-400 shadow-sm transition-colors">
                         <LuUpload size={24} />
                       </div>
                       <div className="text-left">
-                        <p className="text-sm font-bold text-gray-700">Select product images</p>
-                        <p className="text-xs text-gray-400 font-medium">{imageFiles.length > 0 ? `${imageFiles.length} files selected` : "Drag and drop or click to browse"}</p>
+                        <p className="text-sm font-bold text-gray-700 dark:text-gray-300">Select product images</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 font-medium">{imageFiles.length > 0 ? `${imageFiles.length} files selected` : "Drag and drop or click to browse"}</p>
                       </div>
                     </label>
 
@@ -295,11 +297,11 @@ import toast from "react-hot-toast"; const AdminProducts = () => {
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-6 border-t border-gray-50">
+              <div className="flex gap-4 pt-6 border-t border-gray-50 dark:border-gray-800">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 py-4 bg-gray-100 rounded-2xl font-bold text-gray-600 hover:bg-gray-200 transition-all"
+                  className="flex-1 py-4 bg-gray-100 dark:bg-gray-800 rounded-2xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
                 >
                   Discard
                 </button>

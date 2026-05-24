@@ -17,6 +17,7 @@ const orderRoutes = require("./routes/order.routes");
 const paymentRoutes = require("./routes/payment.routes");
 const userRoutes = require("./routes/user.routes");
 const adminRoutes = require("./routes/admin.routes");
+const addressRoutes = require("./routes/address.routes");
 
 
 // 🔹 Connect DB
@@ -54,6 +55,7 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/categories", require("./routes/category.routes"));
 app.use("/api/payment", paymentRoutes);
+app.use("/api/addresses", addressRoutes);
 app.use("/api/admin", adminRoutes);
 
 // 🔹 Root

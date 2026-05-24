@@ -74,7 +74,7 @@ const OrderSuccess = () => {
                 <LuTruck size={14} /> Delivering to
               </p>
               <p className="text-sm text-gray-700 font-medium">
-                {order.shippingAddress.address}, {order.shippingAddress.city}
+                {order.shippingAddress.houseNo}, {order.shippingAddress.area}, {order.shippingAddress.city}
               </p>
               <p className="text-sm text-gray-500">
                 {order.shippingAddress.state} — {order.shippingAddress.pincode}

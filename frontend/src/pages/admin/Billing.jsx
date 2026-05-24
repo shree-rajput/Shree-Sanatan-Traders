@@ -102,38 +102,39 @@ const AdminBilling = () => {
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-180px)] animate-in fade-in duration-500">
+    <div className="min-h-screen p-6 bg-gray-50 dark:bg-gray-950">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-180px)] animate-in fade-in duration-500">
         {/* Product Selection */}
         <div className="lg:col-span-7 flex flex-col space-y-6">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
               <input
                 type="text"
                 placeholder="Search by product name or scan barcode..."
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-emerald-600 transition-all font-medium"
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-emerald-600 transition-all font-medium dark:text-white outline-none"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex-1 overflow-y-auto">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex-1 overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {filteredProducts.map((p) => (
                 <button
                   key={p._id}
                   onClick={() => addToCart(p)}
                   disabled={p.stock <= 0}
-                  className={`p-4 rounded-2xl border border-gray-50 text-left transition-all hover:shadow-md hover:border-emerald-200 group flex flex-col ${p.stock <= 0 ? 'opacity-50 grayscale' : ''}`}
+                  className={`p-4 rounded-2xl border border-gray-50 dark:border-gray-800 text-left transition-all hover:shadow-md hover:border-emerald-200 dark:hover:border-emerald-900 group flex flex-col ${p.stock <= 0 ? 'opacity-50 grayscale' : 'bg-white dark:bg-gray-800/50'}`}
                 >
-                  <div className="w-full aspect-square bg-gray-50 rounded-xl mb-3 overflow-hidden">
+                  <div className="w-full aspect-square bg-gray-50 dark:bg-gray-800 rounded-xl mb-3 overflow-hidden">
                     <img src={p.images?.[0] || '/box1.png'} alt={p.name} className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
                   </div>
-                  <h4 className="font-bold text-gray-900 text-sm line-clamp-2 leading-tight flex-1">{p.name}</h4>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm line-clamp-2 leading-tight flex-1">{p.name}</h4>
                   <div className="mt-2 flex justify-between items-center">
-                    <span className="text-emerald-700 font-black">₹{p.variants?.[0]?.price}</span>
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${p.stock < 10 ? 'bg-red-100 text-red-600' : 'bg-green-100 text-emerald-600'}`}>
+                    <span className="text-emerald-700 dark:text-emerald-400 font-black">₹{p.variants?.[0]?.price}</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${p.stock < 10 ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-green-100 dark:bg-green-900/30 text-emerald-600 dark:text-emerald-400'}`}>
                       {p.stock}
                     </span>
                   </div>
@@ -145,10 +146,10 @@ const AdminBilling = () => {
 
         {/* Cart & Billing Detail */}
         <div className="lg:col-span-5 flex flex-col space-y-6">
-          <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex-1 flex flex-col">
+          <div className="bg-white dark:bg-gray-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 flex-1 flex flex-col">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-black text-gray-900">Current Bill</h3>
-              <button onClick={() => setCart([])} className="text-red-500 hover:text-red-600">
+              <h3 className="text-xl font-black text-gray-900 dark:text-white">Current Bill</h3>
+              <button onClick={() => setCart([])} className="text-red-500 dark:text-red-400 hover:text-red-600 transition-colors">
                 <Trash2 size={20} />
               </button>
             </div>
@@ -160,7 +161,7 @@ const AdminBilling = () => {
                 <input
                   type="text"
                   placeholder="Name"
-                  className="w-full pl-10 pr-3 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-600"
+                  className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 dark:text-white outline-none"
                   value={customer.name}
                   onChange={(e) => setCustomer({ ...customer, name: e.target.value })}
                 />
@@ -170,7 +171,7 @@ const AdminBilling = () => {
                 <input
                   type="text"
                   placeholder="Phone"
-                  className="w-full pl-10 pr-3 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-600"
+                  className="w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-emerald-600 dark:text-white outline-none"
                   value={customer.phone}
                   onChange={(e) => setCustomer({ ...customer, phone: e.target.value })}
                 />
@@ -180,25 +181,25 @@ const AdminBilling = () => {
             {/* Items List */}
             <div className="flex-1 overflow-y-auto space-y-4 mb-6 pr-2">
               {cart.map((item) => (
-                <div key={item._id} className="flex items-center gap-3 bg-gray-50 p-3 rounded-2xl group">
-                  <div className="w-12 h-12 bg-white rounded-xl flex-shrink-0">
+                <div key={item._id} className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-2xl group">
+                  <div className="w-12 h-12 bg-white dark:bg-gray-700 rounded-xl flex-shrink-0">
                     <img src={item.images?.[0] || '/box1.png'} className="w-full h-full object-contain" />
                   </div>
                   <div className="flex-1">
-                    <h5 className="font-bold text-gray-900 text-sm line-clamp-1">{item.name}</h5>
-                    <p className="text-xs text-gray-500 font-bold">₹{item.variants?.[0]?.price} / unit</p>
+                    <h5 className="font-bold text-gray-900 dark:text-white text-sm line-clamp-1">{item.name}</h5>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold">₹{item.variants?.[0]?.price} / unit</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button onClick={() => updateQuantity(item._id, -1)} className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center text-gray-600">
+                    <button onClick={() => updateQuantity(item._id, -1)} className="w-6 h-6 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300">
                       <Minus size={12} />
                     </button>
-                    <span className="w-4 text-center font-black text-sm">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item._id, 1)} className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center text-gray-600">
+                    <span className="w-4 text-center font-black text-sm dark:text-white">{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item._id, 1)} className="w-6 h-6 rounded-md bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300">
                       <Plus size={12} />
                     </button>
                   </div>
                   <div className="text-right ml-2">
-                    <p className="font-black text-gray-900 text-sm">₹{item.variants?.[0]?.price * item.quantity}</p>
+                    <p className="font-black text-gray-900 dark:text-white text-sm">₹{item.variants?.[0]?.price * item.quantity}</p>
                   </div>
                 </div>
               ))}
@@ -211,29 +212,29 @@ const AdminBilling = () => {
             </div>
 
             {/* Summary */}
-            <div className="space-y-4 pt-6 border-t border-gray-100">
-              <div className="flex justify-between items-center text-gray-500 font-bold">
+            <div className="space-y-4 pt-6 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 font-bold">
                 <span>Subtotal</span>
                 <span>₹{calculateTotal()}</span>
               </div>
-              <div className="flex justify-between items-center text-gray-500 font-bold">
+              <div className="flex justify-between items-center text-gray-500 dark:text-gray-400 font-bold">
                 <span>Tax (GST 0%)</span>
                 <span>₹0</span>
               </div>
-              <div className="flex justify-between items-center text-2xl font-black text-gray-900">
+              <div className="flex justify-between items-center text-2xl font-black text-gray-900 dark:text-white">
                 <span>Total</span>
-                <span className="text-emerald-700">₹{calculateTotal()}</span>
+                <span className="text-emerald-700 dark:text-emerald-500">₹{calculateTotal()}</span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-2">
-                <button className="flex items-center justify-center gap-2 py-3 border-2 border-gray-100 rounded-2xl font-bold text-gray-600 hover:bg-gray-50 transition-all">
+                <button className="flex items-center justify-center gap-2 py-3 border-2 border-gray-100 dark:border-gray-800 rounded-2xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                   <Printer size={18} />
                   Hold
                 </button>
                 <button
                   onClick={handleCheckout}
                   disabled={isProcessing || cart.length === 0}
-                  className="flex items-center justify-center gap-2 py-3 bg-emerald-700 rounded-2xl font-black text-white shadow-lg shadow-green-100 hover:bg-green-800 transition-all disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 py-3 bg-emerald-700 rounded-2xl font-black text-white shadow-lg shadow-emerald-100/50 dark:shadow-emerald-900/40 hover:bg-emerald-800 transition-all disabled:opacity-50"
                 >
                   <CreditCard size={18} />
                   {isProcessing ? "Processing..." : "Pay & Print"}
@@ -243,6 +244,7 @@ const AdminBilling = () => {
           </div>
         </div>
       </div>
+    </div>
 
   );
 };

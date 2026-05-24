@@ -1,9 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LuUser, LuMapPin, LuPackage, LuLogOut, LuChevronRight, LuLoaderCircle, LuShieldCheck, LuSettings, LuBox } from "react-icons/lu";
+import {
+  LuUser,
+  LuMapPin,
+  LuPackage,
+  LuLogOut,
+  LuChevronRight,
+  LuLoaderCircle,
+  LuShieldCheck,
+  LuSettings,
+  LuBox,
+  LuSprout,
+  LuStore,
+  LuPencil,
+} from "react-icons/lu";
+
 import { useAuth } from "../context/AuthContext";
 import API from "../services/api";
 import toast from "react-hot-toast";
+import AddressManager from "../components/AddressManager";
+import ProfileSettings from "../components/profile/ProfileSettings";
+import BusinessDetails from "../components/profile/BusinessDetails";
 
 const Profile = () => {
   const { user, login, logout } = useAuth();
@@ -12,23 +29,24 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
-    phone: user?.phone || ""
+    phone: user?.phone || "",
+    userType: user?.userType || "farmer",
+    landSize: user?.landSize || "",
+    crops: user?.crops?.join(", ") || "",
+    irrigation: user?.irrigation || "",
+    shopName: user?.shopName || "",
+    businessType: user?.businessType || "",
   });
 
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
         const res = await API.get("/orders");
-
-        setOrders(
-          Array.isArray(res.data)
-            ? res.data
-            : res.data.orders || []
-        );
-
+        setOrders(Array.isArray(res.data) ? res.data : res.data.orders || []);
       } catch (err) {
         console.error("Failed to fetch data");
         setOrders([]);
@@ -42,12 +60,23 @@ const Profile = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await API.put("/users/me", formData);
+      const dataToSubmit = {
+        ...formData,
+        crops: formData.crops
+          .split(",")
+          .map((c) => c.trim())
+          .filter((c) => c !== ""),
+      };
+
+      const res = await API.put("/users/me", dataToSubmit);
+
       login(res.data, localStorage.getItem("token"));
+
       toast.success("Profile updated successfully!");
     } catch (err) {
-      toast.error("Failed to update profile.");
+      toast.error(err.response?.data?.message || "Failed to update profile.");
     }
   };
 
@@ -60,102 +89,173 @@ const Profile = () => {
   }
 
   const tabs = [
-    { id: "overview", name: "Overview", icon: LuUser },
+    { id: "overview", name: "Personal", icon: LuUser },
+    {
+      id: "business",
+      name: "Business",
+      icon: user?.userType === "farmer" ? LuSprout : LuStore,
+    },
+    { id: "addresses", name: "Addresses", icon: LuMapPin },
     { id: "orders", name: "Orders", icon: LuPackage },
     { id: "settings", name: "Settings", icon: LuSettings },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50/50 py-12 px-6">
-      <div className="max-w-6xl mx-auto">
-
+    <div className="min-h-screen bg-gray-50 py-8 px-4 md:px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
         <div className="mb-10">
-          <h1 className="text-3xl font-bold text-gray-900">My <span className="text-green-600">Account</span></h1>
-          <p className="text-gray-400 font-medium mt-1">Manage your profile and orders</p>
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
+            My <span className="text-green-600">Account</span>
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Manage your profile, addresses and orders
+          </p>
         </div>
 
-        <div className="grid lg:grid-cols-[280px_1fr] gap-10">
+        <div className="grid lg:grid-cols-[300px_1fr] gap-8">
           {/* Sidebar */}
           <aside className="space-y-6">
+            {/* User Card */}
             <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm text-center">
-              <div className="w-20 h-20 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center text-3xl font-bold mx-auto mb-4">
-                {user?.name?.[0]}
-              </div>
-              <h2 className="text-xl font-bold text-gray-900">{user?.name}</h2>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-1">{user?.role || "Customer"}</p>
-
-              <div className="mt-8 pt-8 border-t border-gray-50 grid grid-cols-2 gap-4">
-                <div className="text-center">
-                  <p className="text-lg font-bold text-gray-900">{orders.length}</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Orders</p>
+              <div className="relative w-24 h-24 mx-auto mb-5">
+                <div className="w-full h-full rounded-3xl bg-green-100 text-green-700 flex items-center justify-center text-4xl font-bold shadow-md">
+                  {user?.name?.[0]}
                 </div>
-                <div className="text-center border-l border-gray-50">
-                  <p className="text-lg font-bold text-green-600">₹{orders.reduce((s, o) => s + (o.totalPrice || 0), 0).toLocaleString()}</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Spent</p>
+
+                <button className="absolute -bottom-1 -right-1 p-2 bg-white rounded-xl border border-gray-200 shadow-md hover:text-green-600 transition">
+                  <LuPencil size={14} />
+                </button>
+              </div>
+
+              <h2 className="text-xl font-bold text-gray-900">{user?.name}</h2>
+
+              <p className="text-xs uppercase tracking-widest text-gray-500 mt-1 font-semibold">
+                {user?.userType || "User"}
+              </p>
+
+              <div className="mt-8 pt-6 border-t border-gray-100 grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {orders.length}
+                  </p>
+
+                  <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">
+                    Orders
+                  </p>
+                </div>
+
+                <div className="border-l border-gray-100">
+                  <p className="text-2xl font-bold text-green-600">
+                    ₹
+                    {orders
+                      .reduce((s, o) => s + (o.totalPrice || 0), 0)
+                      .toLocaleString()}
+                  </p>
+
+                  <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">
+                    Spent
+                  </p>
                 </div>
               </div>
             </div>
 
-            <nav className="bg-white rounded-3xl p-2 border border-gray-100 shadow-sm">
-              {tabs.map(tab => (
+            {/* Navigation */}
+            <nav className="bg-white rounded-3xl p-3 border border-gray-100 shadow-sm">
+              {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold transition-all ${activeTab === tab.id ? "bg-green-600 text-white shadow-lg shadow-green-100" : "text-gray-400 hover:text-green-600 hover:bg-gray-50"
-                    }`}
+                  className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-semibold transition-all mb-2 ${
+                    activeTab === tab.id
+                      ? "bg-green-600 text-white shadow-md"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-green-600"
+                  }`}
                 >
                   <tab.icon size={18} />
                   {tab.name}
                 </button>
               ))}
+
               <button
-                onClick={() => { logout(); navigate("/login"); }}
-                className="w-full flex items-center gap-3 px-6 py-4 rounded-2xl text-sm font-bold text-red-400 hover:bg-red-50 hover:text-red-600 transition-all mt-2"
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                }}
+                className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-all"
               >
-                <LuLogOut size={18} /> Logout
+                <LuLogOut size={18} />
+                Logout
               </button>
             </nav>
           </aside>
 
-          {/* Content */}
-          <main>
+          {/* Main Content */}
+          <main className="bg-white rounded-3xl p-6 md:p-10 border border-gray-100 shadow-sm min-h-[600px]">
+            {/* PERSONAL TAB */}
             {activeTab === "overview" && (
-              <div className="bg-white rounded-3xl p-8 md:p-12 border border-gray-100 shadow-sm space-y-10">
+              <div className="space-y-10">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-gray-900">Personal Details</h3>
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Personal Details
+                  </h3>
+
                   <LuShieldCheck className="text-green-600" size={24} />
                 </div>
 
-                <form onSubmit={handleUpdate} className="grid md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                <form
+                  onSubmit={handleUpdate}
+                  className="grid md:grid-cols-2 gap-6"
+                >
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-600 mb-2">
+                      Full Name
+                    </label>
+
                     <input
                       type="text"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all font-medium"
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:border-green-500 focus:bg-white outline-none"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Phone Number</label>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-600 mb-2">
+                      Phone Number
+                    </label>
+
                     <input
                       type="text"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-6 py-4 bg-gray-50 border border-gray-100 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all font-medium"
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      className="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-50 focus:border-green-500 focus:bg-white outline-none"
                     />
                   </div>
-                  <div className="md:col-span-2 space-y-2">
-                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-gray-600 mb-2">
+                      Email Address
+                    </label>
+
                     <input
                       type="email"
                       value={formData.email}
                       readOnly
-                      className="w-full px-6 py-4 bg-gray-100/50 border border-gray-100 rounded-2xl text-gray-400 font-medium cursor-not-allowed"
+                      className="w-full px-5 py-4 rounded-2xl border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed"
                     />
                   </div>
-                  <div className="md:col-span-2 pt-4">
-                    <button type="submit" className="px-8 py-4 bg-green-600 text-white rounded-2xl font-bold shadow-lg shadow-green-100 hover:bg-green-700 transition-all">
+
+                  <div className="md:col-span-2 pt-2">
+                    <button
+                      type="submit"
+                      className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-semibold transition"
+                    >
                       Save Changes
                     </button>
                   </div>
@@ -163,49 +263,109 @@ const Profile = () => {
               </div>
             )}
 
+            {/* BUSINESS TAB */}
+            {activeTab === "business" && (
+              <BusinessDetails
+                formData={formData}
+                setFormData={setFormData}
+                handleUpdate={handleUpdate}
+              />
+            )}
+
+            {/* ADDRESSES */}
+            {activeTab === "addresses" && <AddressManager />}
+
+            {/* ORDERS */}
             {activeTab === "orders" && (
               <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Order History
+                  </h3>
+
+                  <LuPackage className="text-green-600" size={24} />
+                </div>
+
                 {orders.length === 0 ? (
-                  <div className="bg-white rounded-3xl p-20 text-center border border-gray-100 shadow-sm">
-                    <LuBox size={48} className="mx-auto text-gray-200 mb-6" />
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">No orders yet</h2>
-                    <p className="text-gray-500 mb-8">When you buy something, it will appear here.</p>
-                    <button onClick={() => navigate("/products")} className="px-8 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-all">
+                  <div className="text-center py-20">
+                    <LuBox size={50} className="mx-auto text-gray-300 mb-5" />
+
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                      No orders yet
+                    </h2>
+
+                    <p className="text-gray-500 mb-8">
+                      When you buy something, it will appear here.
+                    </p>
+
+                    <button
+                      onClick={() => navigate("/products")}
+                      className="px-8 py-3 bg-green-600 text-white rounded-2xl font-semibold hover:bg-green-700 transition"
+                    >
                       Start Shopping
                     </button>
                   </div>
                 ) : (
-                  orders.map(order => (
-                    <div key={order._id} className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                          <LuPackage size={24} />
+                  <div className="space-y-4">
+                    {orders.map((order) => (
+                      <div
+                        key={order._id}
+                        onClick={() => navigate(`/orders/${order._id}`)}
+                        className="p-6 bg-gray-50 rounded-2xl border border-gray-200 hover:border-green-400 transition cursor-pointer flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-5">
+                          <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-green-600 shadow-sm">
+                            <LuPackage size={26} />
+                          </div>
+
+                          <div>
+                            <p className="text-xs text-gray-500 mb-1">
+                              ID: #{order._id.slice(-8)}
+                            </p>
+
+                            <h4 className="text-xl font-bold text-gray-900">
+                              ₹{(order.totalPrice || 0).toLocaleString()}
+                            </h4>
+
+                            <p className="text-sm text-gray-500">
+                              {new Date(order.createdAt).toLocaleDateString(
+                                undefined,
+                                {
+                                  dateStyle: "long",
+                                },
+                              )}
+                            </p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Order #{order._id.slice(-6)}</p>
-                          <p className="text-lg font-bold text-gray-900">₹{(order.totalPrice || 0).toLocaleString()}</p>
-                          <p className="text-[10px] font-bold text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</p>
+
+                        <div className="flex items-center gap-5">
+                          <span
+                            className={`px-4 py-2 rounded-full text-xs font-bold uppercase ${
+                              order.status === "delivered"
+                                ? "bg-green-100 text-green-700"
+                                : order.status === "cancelled"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-blue-100 text-blue-700"
+                            }`}
+                          >
+                            {order.status || "Processing"}
+                          </span>
+
+                          <LuChevronRight size={22} className="text-gray-400" />
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest ${order.paymentStatus === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
-                          }`}>
-                          {order.paymentStatus || 'Pending'}
-                        </span>
-                        <LuChevronRight size={20} className="text-gray-300" />
-                      </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
             )}
 
+            {/* SETTINGS */}
             {activeTab === "settings" && (
-              <div className="bg-white rounded-3xl p-12 border border-gray-100 shadow-sm text-center">
-                <LuSettings size={48} className="mx-auto text-gray-200 mb-6" />
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Account Settings</h2>
-                <p className="text-gray-500 mb-8">Security and preference settings are coming soon.</p>
-              </div>
+              <ProfileSettings
+                user={user}
+                refreshProfile={() => window.location.reload()}
+              />
             )}
           </main>
         </div>
