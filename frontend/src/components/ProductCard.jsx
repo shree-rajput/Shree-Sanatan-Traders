@@ -12,7 +12,8 @@ const ProductCard = ({ product }) => {
 
   const imageUrl = product.image || product.images?.[0] || "/box1.png";
   const price = product.price || product.variants?.[0]?.price || 0;
-  const isOutOfStock = product.stock === 0 || product.stockStatus === "out_of_stock";
+  const isOutOfStock =
+    product.stock === 0 || product.stockStatus === "out_of_stock";
   const isLowStock = product.stock > 0 && product.stock <= 5;
 
   const handleAddToCart = (e) => {
@@ -35,15 +36,16 @@ const ProductCard = ({ product }) => {
           price,
           qty: 1,
           image: imageUrl,
-          images: product.images
-        }
-      }
+          images: product.images,
+        },
+      },
     });
   };
 
   return (
-    <div className={`relative bg-white rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-xl hover:shadow-green-500/5 transition-all p-4 flex flex-col group ${isOutOfStock ? "opacity-60" : ""}`}>
-
+    <div
+      className={`relative bg-white rounded-2xl border border-gray-100 hover:border-green-200 hover:shadow-xl hover:shadow-green-500/5 transition-all p-4 flex flex-col group ${isOutOfStock ? "opacity-60" : ""}`}
+    >
       {/* Out of Stock Badge */}
       {isOutOfStock && (
         <div className="absolute top-3 left-3 z-10">
@@ -63,8 +65,14 @@ const ProductCard = ({ product }) => {
       )}
 
       {/* Image */}
-      <Link to={`/product/${product._id}`}
-        className={`aspect-square rounded-xl overflow-hidden bg-gray-50 mb-4 block ${isOutOfStock ? "grayscale" : ""}`}>
+      {/* <Link
+        to={`/product/${product._id}`}
+        className={`aspect-square rounded-xl overflow-hidden bg-gray-50 mb-4 block ${isOutOfStock ? "grayscale" : ""}`}
+      > */}
+      <Link
+        to={`/product/${product._id}`}
+        className={`aspect-square rounded-xl overflow-hidden bg-gray-50 mb-4 block}`}
+      >
         <img
           src={imageUrl}
           alt={product.name}
@@ -89,8 +97,12 @@ const ProductCard = ({ product }) => {
       <div className="pt-4 border-t border-gray-50">
         <div className="flex items-center justify-between mb-3">
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t("price")}</span>
-            <span className="text-xl font-bold text-gray-900">₹{price.toLocaleString()}</span>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
+              {t("price")}
+            </span>
+            <span className="text-xl font-bold text-gray-900">
+              ₹{price.toLocaleString()}
+            </span>
           </div>
 
           <button
@@ -101,8 +113,8 @@ const ProductCard = ({ product }) => {
               isOutOfStock
                 ? "bg-gray-100 text-gray-300 cursor-not-allowed"
                 : isAdded
-                ? "bg-amber-500 text-white shadow-lg shadow-amber-100"
-                : "bg-green-600 text-white shadow-lg shadow-green-100 hover:bg-green-700"
+                  ? "bg-amber-500 text-white shadow-lg shadow-amber-100"
+                  : "bg-green-600 text-white shadow-lg shadow-green-100 hover:bg-green-700"
             }`}
           >
             {isAdded ? <LuCheck size={20} /> : <LuPlus size={20} />}

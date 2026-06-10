@@ -20,7 +20,7 @@ import API from "../services/api";
 import toast from "react-hot-toast";
 import AddressManager from "../components/AddressManager";
 import ProfileSettings from "../components/profile/ProfileSettings";
-import BusinessDetails from "../components/profile/BusinessDetails";
+// import BusinessDetails from "../components/profile/BusinessDetails";
 
 const Profile = () => {
   const { user, login, logout } = useAuth();
@@ -30,24 +30,24 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [orders, setOrders] = useState([]);
 
- const [formData, setFormData] = useState({
-  name: user?.name || "",
-  email: user?.email || "",
-  phone: user?.phone || "",
-  avatar: user?.avatar || "",
+  const [formData, setFormData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    avatar: user?.avatar || "",
 
-  userType: user?.userType || "farmer",
+    userType: user?.userType || "farmer",
 
-  landSize: user?.landSize || "",
-  crops: user?.crops?.join(", ") || "",
-  irrigation: user?.irrigation || "",
+    landSize: user?.landSize || "",
+    crops: user?.crops?.join(", ") || "",
+    irrigation: user?.irrigation || "",
 
-  shopName: user?.shopName || "",
-  businessType: user?.businessType || "",
+    shopName: user?.shopName || "",
+    businessType: user?.businessType || "",
 
-  website: user?.website || "",
-  address: user?.address || "",
-});
+    website: user?.website || "",
+    address: user?.address || "",
+  });
 
   useEffect(() => {
     const fetchProfileData = async () => {
@@ -269,15 +269,15 @@ const Profile = () => {
                 </form>
               </div>
             )}
-
-            {/* BUSINESS TAB */}
+            {/* 
+            BUSINESS TAB
             {activeTab === "business" && (
               <BusinessDetails
                 formData={formData}
                 setFormData={setFormData}
                 handleUpdate={handleUpdate}
               />
-            )}
+            )} */}
 
             {/* ADDRESSES */}
             {activeTab === "addresses" && <AddressManager />}

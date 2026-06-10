@@ -14,6 +14,8 @@ import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
 import "./index.css";
+import ProductSkeleton from "./components/ui/ProductSkeleton";
+import TrialCompo from "./components/TrialCompo";
 
 // 📦 Lazy Pages
 const Home = lazy(() => import("./pages/Home"));
@@ -71,6 +73,7 @@ function App() {
 
               <Suspense fallback={<GlobalLoader />}>
                 <Routes>
+                  <Route path='loading' element={<TrialCompo/>}/>
 
                   {/* USER */}
                   <Route element={<UserLayout />}>
