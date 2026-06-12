@@ -35,8 +35,13 @@ const Navbar = () => {
         {/* Logo */}
         <div className="flex items-center gap-6">
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-100 group-hover:bg-amber-500 transition-colors">
-              <LuShoppingBag size={24} />
+            <div>
+              {/* <LuShoppingBag size={24} /> */}
+              <img
+                src="/images/sst_logo.jpeg"
+                alt="Logo"
+                className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-100 group-hover:bg-amber-500 transition-colors"
+              />
             </div>
             <span className="text-xl font-bold tracking-tight text-gray-900">
               Shree Sanatan <span className="text-green-600">Traders</span>

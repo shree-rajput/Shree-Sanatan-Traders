@@ -31,9 +31,13 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+    // category: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Category",
+    //   required: true
+    // },
+       category: {
+      type: String,
       required: true
     },
     description: String,
@@ -129,7 +133,19 @@ const productSchema = new mongoose.Schema(
 );
 
 // ✅ Auto-compute stockStatus before save
-productSchema.pre("save", function (next) {
+// productSchema.pre("save", function (next) {
+//   if (this.stock === 0) {
+//     this.stockStatus = "out_of_stock";
+//   } else if (this.stock <= (this.lowStockThreshold ?? 5)) {
+//     this.stockStatus = "low_stock";
+//   } else {
+//     this.stockStatus = "in_stock";
+//   }
+//   next();
+// });
+
+
+productSchema.pre("save", function () {
   if (this.stock === 0) {
     this.stockStatus = "out_of_stock";
   } else if (this.stock <= (this.lowStockThreshold ?? 5)) {
@@ -137,7 +153,5 @@ productSchema.pre("save", function (next) {
   } else {
     this.stockStatus = "in_stock";
   }
-  next();
-});
-
+  });
 module.exports = mongoose.model("Product", productSchema);

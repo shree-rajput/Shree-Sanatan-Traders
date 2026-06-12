@@ -1,6 +1,18 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LuBadgePercent, LuBell, LuBoxes, LuChartBar, LuHeadphones, LuLayoutDashboard, LuPackage, LuSettings, LuShoppingBag, LuStar, LuUsers } from "react-icons/lu";
+import {
+  LuBadgePercent,
+  LuBell,
+  LuBoxes,
+  LuChartBar,
+  LuHeadphones,
+  LuLayoutDashboard,
+  LuPackage,
+  LuSettings,
+  LuShoppingBag,
+  LuStar,
+  LuUsers,
+} from "react-icons/lu";
 
 export const adminLinks = [
   { name: "Dashboard", path: "/admin/dashboard", icon: LuLayoutDashboard },
@@ -21,10 +33,17 @@ const AdminSidebar = ({ onNavigate }) => (
     <div className="border-b border-gray-200 p-6 dark:border-gray-800">
       <NavLink to="/" className="flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-green-600 text-white shadow-lg shadow-green-600/20">
-          <LuShoppingBag size={23} />
+          {/* <LuShoppingBag size={23} /> */}
+          <img
+            src="/images/sst_logo.jpeg"
+            alt="Logo"
+            className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-green-100 group-hover:bg-amber-500 transition-colors"
+          />
         </div>
         <div>
-          <p className="text-lg font-black text-gray-900 dark:text-white">SST Admin</p>
+          <p className="text-lg font-black text-gray-900 dark:text-white">
+            SST Admin
+          </p>
           <p className="text-xs font-bold text-gray-400">Marketplace OS</p>
         </div>
       </NavLink>
@@ -35,9 +54,13 @@ const AdminSidebar = ({ onNavigate }) => (
           key={link.path}
           to={link.path}
           onClick={onNavigate}
-          className={({ isActive }) => `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition ${
-            isActive ? "bg-green-600 text-white shadow-lg shadow-green-600/20" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-white"
-          }`}
+          className={({ isActive }) =>
+            `flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-black transition ${
+              isActive
+                ? "bg-green-600 text-white shadow-lg shadow-green-600/20"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-900 dark:hover:text-white"
+            }`
+          }
         >
           <link.icon size={18} />
           {link.name}

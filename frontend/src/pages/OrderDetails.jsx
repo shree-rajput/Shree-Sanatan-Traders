@@ -111,13 +111,9 @@ const OrderDetails = () => {
 
   const currentIdx = STATUS_ORDER.indexOf(order.orderStatus);
 
-  const isTerminal = ["cancelled", "returned"].includes(
-    order.orderStatus
-  );
+  const isTerminal = ["cancelled", "returned"].includes(order.orderStatus);
 
-  const canCancel = ["pending", "confirmed"].includes(
-    order.orderStatus
-  );
+  const canCancel = ["pending", "confirmed"].includes(order.orderStatus);
 
   const canReturn = order.orderStatus === "delivered";
 
@@ -175,35 +171,29 @@ const OrderDetails = () => {
                       <React.Fragment key={step.key}>
                         <div className="flex flex-col items-center gap-2">
                           <div
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-base border-2 transition-all ${done
-                              ? "bg-green-600 border-green-600 shadow-lg shadow-green-100"
-                              : "bg-white border-gray-200"
-                              } ${active
-                                ? "ring-4 ring-green-100"
-                                : ""
-                              }`}
+                            className={`w-10 h-10 rounded-full flex items-center justify-center text-base border-2 transition-all ${
+                              done
+                                ? "bg-green-600 border-green-600 shadow-lg shadow-green-100"
+                                : "bg-white border-gray-200"
+                            } ${active ? "ring-4 ring-green-100" : ""}`}
                           >
                             {done ? "✓" : step.icon}
                           </div>
 
                           <span
-                            className={`text-[9px] font-bold text-center max-w-[60px] leading-tight ${done
-                              ? "text-green-600"
-                              : "text-gray-400"
-                              }`}
+                            className={`text-[9px] font-bold text-center max-w-[60px] leading-tight ${
+                              done ? "text-green-600" : "text-gray-400"
+                            }`}
                           >
-                            {lang === "hi"
-                              ? step.hi
-                              : step.label}
+                            {lang === "hi" ? step.hi : step.label}
                           </span>
                         </div>
 
                         {idx < TIMELINE.length - 1 && (
                           <div
-                            className={`flex-1 h-0.5 mx-1 transition-all ${idx < currentIdx
-                              ? "bg-green-500"
-                              : "bg-gray-200"
-                              }`}
+                            className={`flex-1 h-0.5 mx-1 transition-all ${
+                              idx < currentIdx ? "bg-green-500" : "bg-gray-200"
+                            }`}
                           />
                         )}
                       </React.Fragment>
@@ -216,33 +206,28 @@ const OrderDetails = () => {
             {/* Cancelled/Returned */}
             {isTerminal && (
               <div
-                className={`p-4 rounded-2xl border ${order.orderStatus === "cancelled"
-                  ? "bg-red-50 border-red-100 text-red-700"
-                  : "bg-gray-50 border-gray-200 text-gray-600"
-                  }`}
+                className={`p-4 rounded-2xl border ${
+                  order.orderStatus === "cancelled"
+                    ? "bg-red-50 border-red-100 text-red-700"
+                    : "bg-gray-50 border-gray-200 text-gray-600"
+                }`}
               >
                 <p className="font-bold capitalize">
                   Order {order.orderStatus}
                 </p>
 
-                {(order.cancelReason ||
-                  order.returnReason) && (
-                    <p className="text-sm mt-1 opacity-80">
-                      Reason:{" "}
-                      {order.cancelReason ||
-                        order.returnReason}
-                    </p>
-                  )}
+                {(order.cancelReason || order.returnReason) && (
+                  <p className="text-sm mt-1 opacity-80">
+                    Reason: {order.cancelReason || order.returnReason}
+                  </p>
+                )}
               </div>
             )}
 
             {/* Tracking */}
             {order.trackingId && (
               <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-center gap-3">
-                <LuTruck
-                  size={20}
-                  className="text-blue-600"
-                />
+                <LuTruck size={20} className="text-blue-600" />
 
                 <div>
                   <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">
@@ -277,10 +262,7 @@ const OrderDetails = () => {
                             className="w-full h-full object-contain"
                           />
                         ) : (
-                          <LuPackage
-                            size={20}
-                            className="text-gray-300"
-                          />
+                          <LuPackage size={20} className="text-gray-300" />
                         )}
                       </div>
 
@@ -290,18 +272,13 @@ const OrderDetails = () => {
                         </p>
 
                         <p className="text-xs text-gray-400">
-                          Qty: {item.quantity} × ₹
-                          {item.price?.toLocaleString()}
+                          Qty: {item.quantity} × ₹{item.price?.toLocaleString()}
                         </p>
                       </div>
                     </div>
 
                     <p className="font-bold text-gray-900">
-                      ₹
-                      {(
-                        (item.price || 0) *
-                        item.quantity
-                      ).toLocaleString()}
+                      ₹{((item.price || 0) * item.quantity).toLocaleString()}
                     </p>
                   </div>
                 ))}
@@ -317,14 +294,10 @@ const OrderDetails = () => {
                   className="flex items-center gap-2 px-6 py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold text-sm hover:bg-red-100 transition-all disabled:opacity-50"
                 >
                   {cancelling ? (
-                    <LuLoader
-                      className="animate-spin"
-                      size={16}
-                    />
+                    <LuLoader className="animate-spin" size={16} />
                   ) : (
                     <LuCircleX size={16} />
                   )}
-
                   Cancel Order
                 </button>
               )}

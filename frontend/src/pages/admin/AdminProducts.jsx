@@ -69,10 +69,12 @@ const AdminProducts = () => {
             {
               key: "stock",
               header: "Stock",
-              render: (p) => (p.stock != 0 ? p.stock : 15),
-              // : p.stockStatus === "out_of_stock"
-              //   ? "Out of Stock"
-              //   : "N/A",
+              render: (p) =>
+                p.stock !== 0
+                  ? p.stock
+                  : p.stockStatus === "out_of_stock"
+                    ? "Out of Stock"
+                    : "N/A",
             },
             {
               key: "status",
