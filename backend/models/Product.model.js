@@ -31,15 +31,15 @@ const productSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
-    // category: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Category",
-    //   required: true
-    // },
-       category: {
-      type: String,
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
       required: true
     },
+// category: {
+//       type: String,
+//       required: true
+//     },
     description: String,
     variants: [variantSchema],
 
@@ -47,7 +47,7 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       default: 0
-    },
+    },       
 
     // 📦 Inventory
     stock: {

@@ -13,7 +13,8 @@ exports.createProduct = async (req, res) => {
       productData.variants = JSON.parse(productData.variants);
     }
 
-    const product = await Product.create(productData);
+    const product = await Product.create(productData).populate("category", "name");
+;
     res.status(201).json(product);
   } catch (error) {
     res.status(500).json({ message: error.message });

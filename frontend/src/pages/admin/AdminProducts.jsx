@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { LuPlus } from "react-icons/lu";
 import API from "../../services/api";
 import DataTable from "../../components/admin/shared/DataTable";
 import SearchBar from "../../components/admin/shared/SearchBar";
 import StatusBadge from "../../components/admin/shared/StatusBadge";
 import Pagination from "../../components/admin/shared/Pagination";
 import LoadingSkeleton from "../../components/admin/shared/LoadingSkeleton";
+import CreateProductModal from "../../components/admin/products/CreateProductModal";
 
 const AdminProducts = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +15,8 @@ const AdminProducts = () => {
   const [page, setPage] = useState(1);
   const [pages, setPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true);
@@ -30,13 +34,23 @@ const AdminProducts = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-black dark:text-white">Products</h1>
-        <p className="text-gray-500">
-          Catalog, variants, SEO, draft, featured and trending controls.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black dark:text-white">Products</h1>
+          <p className="text-gray-500">
+            Catalog, variants, SEO, draft, featured and trending controls.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg shadow-green-200 dark:shadow-none transition-all"
+        >
+          <LuPlus size={20} />
+          Add Product
+        </button>
       </div>
       <SearchBar
         value={search}
@@ -90,6 +104,12 @@ const AdminProducts = () => {
         />
       )}
       <Pagination page={page} pages={pages} onPageChange={setPage} />
+
+      <CreateProductModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+        onProductCreated={fetchProducts} 
+      />
     </div>
   );
 };

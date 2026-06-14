@@ -21,34 +21,46 @@ import {
 
 const CATEGORIES_DATA = [
   {
-    name: "Trailers",
-    image: "/images/cat_trailers.png",
+    name: "Trailers & Attachments",
+    desc: "Heavy-duty agricultural vehicles and transport solutions",
+    image: "/images/cat_trailers_cover.png",
     link: "/products?category=Trailers",
+    className: "lg:col-span-2 lg:row-span-2",
   },
   {
-    name: "Irrigation Kits",
-    image: "/images/cat_irrigation.png",
+    name: "Irrigation Systems",
+    desc: "Smart water management for higher crop yields",
+    image: "/images/cat_irrigation_cover.png",
     link: "/products?category=Irrigation",
+    className: "lg:col-span-2 lg:row-span-1",
   },
   {
     name: "Farming Tools",
-    image: "/images/cat_irrigation.png",
+    desc: "Essential manual and power tools",
+    image: "/images/cat_tools_cover.png",
     link: "/products?category=Tools",
-  },
-  {
-    name: "Accessories",
-    image: "/images/cat_irrigation.png",
-    link: "/products?category=Accessories",
-  },
-  {
-    name: "Spare Parts",
-    image: "/images/cat_pumps.png",
-    link: "/products?category=Spare",
+    className: "lg:col-span-1 lg:row-span-1",
   },
   {
     name: "Pumps & Motors",
-    image: "/images/cat_pumps.png",
+    desc: "High-efficiency water pumps",
+    image: "/images/cat_pumps_cover.png",
     link: "/products?category=Pumps",
+    className: "lg:col-span-1 lg:row-span-1",
+  },
+  {
+    name: "Spare Parts",
+    desc: "Genuine replacements for machinery",
+    image: "/images/cat_parts_cover.png",
+    link: "/products?category=Spare",
+    className: "lg:col-span-2 lg:row-span-1",
+  },
+  {
+    name: "Accessories",
+    desc: "Enhance and upgrade your farming equipment",
+    image: "/images/cat_accessories_cover.png",
+    link: "/products?category=Accessories",
+    className: "lg:col-span-2 lg:row-span-1",
   },
 ];
 
@@ -76,6 +88,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("Fetching products for Home page...");
     API.get("/products")
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err))
@@ -133,26 +146,38 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 auto-rows-[220px] lg:auto-rows-[280px]">
           {CATEGORIES_DATA.map((cat, i) => (
             <Link
               key={i}
               to={cat.link}
-              className="group flex flex-col items-center bg-white border-2 border-green-50 rounded-[32px] p-6 hover:shadow-2xl hover:border-green-200 transition-all duration-300 active:scale-95"
+              className={`group relative overflow-hidden rounded-[32px] bg-gray-900 shadow-md hover:shadow-2xl transition-all duration-500 active:scale-[0.98] ${cat.className}`}
             >
-              <div className="w-full aspect-square overflow-hidden rounded-2xl bg-green-50/30 mb-4 p-2">
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
-                />
+              {/* Background Image */}
+              <img
+                src={cat.image}
+                alt={cat.name}
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
+              />
+              
+              {/* Gradient Overlay for Text Readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none"></div>
+              
+              <div className="relative z-20 flex flex-col h-full justify-end p-8">
+                <h3 className="font-black text-white text-2xl lg:text-3xl mb-1 drop-shadow-md translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                  {cat.name}
+                </h3>
+                
+                <div className="overflow-hidden">
+                  <p className="text-sm font-medium text-gray-300 leading-relaxed opacity-0 translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-75">
+                    {cat.desc}
+                  </p>
+                </div>
+                
+                <div className="absolute top-8 right-8 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500">
+                  <ArrowRight size={20} className="-rotate-45 group-hover:rotate-0 transition-transform duration-500 delay-100" />
+                </div>
               </div>
-              <h3 className="font-black text-gray-800 text-center text-sm">
-                {cat.name}
-              </h3>
-              <p className="text-[10px] font-black text-green-600 mt-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">
-                Explore <ArrowRight size={12} />
-              </p>
             </Link>
           ))}
         </div>
@@ -290,7 +315,7 @@ const Home = () => {
             {/* Store Image */}
             <div className="relative rounded-[64px] overflow-hidden shadow-2xl border-8 border-white group">
               <img
-                src="/images/storefront.png"
+                src="/images/shop_front.jpeg"
                 alt="Our Store"
                 className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-700"
               />
@@ -362,7 +387,7 @@ const Home = () => {
             </div>
             <h4 className="font-black text-xl mb-2">{t("visit_us")}</h4>
             <p className="text-gray-500 font-bold text-sm leading-relaxed">
-              Kargoon District, Bamandi <br />
+              Kargone District, Bamandi <br />
               Madhya Pradesh, India
             </p>
           </div>
