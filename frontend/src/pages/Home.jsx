@@ -159,23 +159,26 @@ const Home = () => {
                 alt={cat.name}
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 opacity-80 group-hover:opacity-100"
               />
-              
+
               {/* Gradient Overlay for Text Readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent pointer-events-none"></div>
-              
+
               <div className="relative z-20 flex flex-col h-full justify-end p-8">
                 <h3 className="font-black text-white text-2xl lg:text-3xl mb-1 drop-shadow-md translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
                   {cat.name}
                 </h3>
-                
+
                 <div className="overflow-hidden">
                   <p className="text-sm font-medium text-gray-300 leading-relaxed opacity-0 translate-y-8 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-500 delay-75">
                     {cat.desc}
                   </p>
                 </div>
-                
+
                 <div className="absolute top-8 right-8 w-12 h-12 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-500">
-                  <ArrowRight size={20} className="-rotate-45 group-hover:rotate-0 transition-transform duration-500 delay-100" />
+                  <ArrowRight
+                    size={20}
+                    className="-rotate-45 group-hover:rotate-0 transition-transform duration-500 delay-100"
+                  />
                 </div>
               </div>
             </Link>
@@ -285,8 +288,9 @@ const Home = () => {
                 {t("about_shop")}
               </div>
               <h2 className="text-5xl font-black text-gray-900 leading-tight tracking-tight">
-                Shree Sanatan <br />
-                <span className="text-green-600">Dharma Traders</span>
+                Shree Sanatani
+                <br />
+                <span className="text-green-600">Traders</span>
               </h2>
               <p className="text-xl text-gray-600 leading-relaxed font-medium">
                 {t("about_desc")}

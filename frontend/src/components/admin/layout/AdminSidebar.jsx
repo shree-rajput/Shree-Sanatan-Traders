@@ -29,7 +29,7 @@ export const adminLinks = [
 ];
 
 const AdminSidebar = ({ onNavigate }) => (
-  <aside className="flex h-full flex-col border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
+  <aside className="flex h-full flex-col border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
     <div className="border-b border-gray-200 p-6 dark:border-gray-800">
       <NavLink to="/" className="flex items-center gap-3">
         <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-green-600 text-white shadow-lg shadow-green-600/20">

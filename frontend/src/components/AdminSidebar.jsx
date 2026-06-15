@@ -7,7 +7,7 @@ import {
   LuUsers,
   LuSettings,
   LuShoppingBag,
-  LuChevronRight
+  LuChevronRight,
 } from "react-icons/lu";
 
 const AdminSidebar = ({ children }) => {
@@ -35,7 +35,7 @@ const AdminSidebar = ({ children }) => {
                 Admin <span className="text-green-500">Panel</span>
               </h2>
               <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">
-                Sheshanathan Traders
+                Shree Sanatan Traders
               </p>
             </div>
           </Link>
@@ -57,7 +57,14 @@ const AdminSidebar = ({ children }) => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <Icon size={20} className={isActive ? "text-white" : "text-gray-500 group-hover:text-green-500"} />
+                  <Icon
+                    size={20}
+                    className={
+                      isActive
+                        ? "text-white"
+                        : "text-gray-500 group-hover:text-green-500"
+                    }
+                  />
                   <span>{link.name}</span>
                 </div>
                 {isActive && <LuChevronRight size={16} />}
@@ -67,21 +74,23 @@ const AdminSidebar = ({ children }) => {
         </nav>
 
         <div className="p-8 border-t border-gray-800">
-           <div className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700/50">
-              <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">Status</p>
-              <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                 <span className="text-xs font-bold text-white">System Online</span>
-              </div>
-           </div>
+          <div className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700/50">
+            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1">
+              Status
+            </p>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+              <span className="text-xs font-bold text-white">
+                System Online
+              </span>
+            </div>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="flex-1 w-full bg-gray-50 min-h-screen overflow-x-hidden">
-        <div className="p-6 md:p-12 max-w-[1600px] mx-auto">
-           {children}
-        </div>
+        <div className="p-6 md:p-12 max-w-[1600px] mx-auto">{children}</div>
       </main>
     </div>
   );
