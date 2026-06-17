@@ -21,9 +21,9 @@ import {
 
 const CATEGORIES_DATA = [
   {
-    name: "Trailers & Attachments",
-    desc: "Heavy-duty agricultural vehicles and transport solutions",
-    image: "/images/cat_trailers_cover.png",
+    name: "PVC accessories",
+    desc: "Complete range of fittings for secure connections",
+    image: "/images/pvc_acc_cover.png",
     link: "/products?category=Trailers",
     className: "lg:col-span-2 lg:row-span-2",
   },
@@ -35,9 +35,9 @@ const CATEGORIES_DATA = [
     className: "lg:col-span-2 lg:row-span-1",
   },
   {
-    name: "Farming Tools",
-    desc: "Essential manual and power tools",
-    image: "/images/cat_tools_cover.png",
+    name: "G. I Item",
+    desc: "Essential tools: Band , Flanch , Nipple etc",
+    image: "/images/cat_parts_cover.png",
     link: "/products?category=Tools",
     className: "lg:col-span-1 lg:row-span-1",
   },
@@ -48,20 +48,20 @@ const CATEGORIES_DATA = [
     link: "/products?category=Pumps",
     className: "lg:col-span-1 lg:row-span-1",
   },
-  {
-    name: "Spare Parts",
-    desc: "Genuine replacements for machinery",
-    image: "/images/cat_parts_cover.png",
-    link: "/products?category=Spare",
-    className: "lg:col-span-2 lg:row-span-1",
-  },
-  {
-    name: "Accessories",
-    desc: "Enhance and upgrade your farming equipment",
-    image: "/images/cat_accessories_cover.png",
-    link: "/products?category=Accessories",
-    className: "lg:col-span-2 lg:row-span-1",
-  },
+  // {
+  //   name: "Spare Parts",
+  //   desc: "Genuine replacements for machinery",
+  //   image: "/images/cat_parts_cover.png",
+  //   link: "/products?category=Spare",
+  //   className: "lg:col-span-2 lg:row-span-1",
+  // },
+  // {
+  //   name: "Accessories",
+  //   desc: "Enhance and upgrade your farming equipment",
+  //   image: "/images/cat_accessories_cover.png",
+  //   link: "/products?category=Accessories",
+  //   className: "lg:col-span-2 lg:row-span-1",
+  // },
 ];
 
 const TESTIMONIALS = [

@@ -178,7 +178,7 @@ const Orders = () => {
                         </p>
                         <p className="text-xs font-bold text-gray-600">
                           {order.paymentMethod === "cod"
-                            ? "💵 COD"
+                            ? "Cash On Delivery"
                             : order.paymentMethod || "COD"}
                         </p>
                       </div>

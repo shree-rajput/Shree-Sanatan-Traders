@@ -249,7 +249,7 @@ const ProductDetails = () => {
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-3 bg-green-500 text-white rounded-2xl font-bold text-sm hover:bg-green-600 transition-all"
             >
-              📱 {t("whatsapp_order")}
+              {t("whatsapp_order")}
             </a>
           </div>
         </div>
