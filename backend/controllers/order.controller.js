@@ -1,5 +1,7 @@
 const Order = require("../models/Order.model");
 const Product = require("../models/Product.model");
+const {sendOrderConfirmation,sendStatusUpdate} = require("../services/email.service");
+
 
 // ============================================================
 // 🛒 PLACE ORDER (User)
@@ -70,6 +72,16 @@ exports.placeOrder = async (req, res) => {
       estimatedDelivery,
       statusHistory: [{ status: "pending", note: "Order placed successfully" }]
     });
+    
+    // 📧 Send confirmation email
+if (req.user.email) {
+
+await sendOrderConfirmation(
+req.user.email,
+order
+);}
+ console.log("EMAIL =>", req.user.email);
+console.log("Sending Email...");
 
     res.status(201).json({ success: true, order });
 
@@ -146,6 +158,16 @@ exports.cancelOrder = async (req, res) => {
     order.statusHistory.push({ status: "cancelled", note: reason || "Cancelled by customer" });
     await order.save();
 
+    // 📧 Send status update email
+if (order.user && order.user.email) {
+await sendStatusUpdate(
+order.user.email,
+order
+);
+}
+console.log("EMAIL =>", order.user.email);
+console.log("Sending Status Update Email...");
+
     res.json({ success: true, message: "Order cancelled successfully", order });
 
   } catch (err) {
@@ -169,11 +191,14 @@ exports.requestReturn = async (req, res) => {
       return res.status(400).json({ message: "Only delivered orders can be returned" });
     }
 
+
+
     order.orderStatus = "returned";
     order.returnReason = reason || "Return requested by customer";
     order.statusHistory.push({ status: "returned", note: reason || "Return requested" });
     await order.save();
 
+    
     res.json({ success: true, message: "Return request submitted", order });
 
   } catch (err) {
@@ -187,13 +212,14 @@ exports.requestReturn = async (req, res) => {
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status, trackingId, note } = req.body;
+    console.log("🔥 UPDATE STATUS API HIT");
 
     const validStatuses = ["pending","confirmed","packed","shipped","out_for_delivery","delivered","cancelled","returned"];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });
     }
-
-    const order = await Order.findById(req.params.id);
+   const order = await Order.findById(req.params.id)
+  .populate("user");
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -238,6 +264,16 @@ exports.updateOrderStatus = async (req, res) => {
     });
 
     await order.save();
+
+      // 📧 Send status update emai
+sendStatusUpdate(
+   order.user.email,
+   order._id.toString().slice(-8).toUpperCase(),
+   status,
+   trackingId
+)
+  console.log("EMAIL =>", order.user.email);
+console.log("Sending Status Update Email..."); 
 
     res.json({ success: true, message: "Order status updated", order });
 

@@ -20,6 +20,7 @@ import API from "../services/api";
 import toast from "react-hot-toast";
 import AddressManager from "../components/AddressManager";
 import ProfileSettings from "../components/profile/ProfileSettings";
+import ProfileSecurity from "../components/profile/ProfileSecurity";
 // import BusinessDetails from "../components/profile/BusinessDetails";
 
 const Profile = () => {
@@ -97,14 +98,10 @@ const Profile = () => {
 
   const tabs = [
     { id: "overview", name: "Personal", icon: LuUser },
-    {
-      id: "business",
-      name: "Business",
-      icon: user?.userType === "farmer" ? LuSprout : LuStore,
-    },
     { id: "addresses", name: "Addresses", icon: LuMapPin },
     { id: "orders", name: "Orders", icon: LuPackage },
     { id: "settings", name: "Settings", icon: LuSettings },
+    { id: "security", name: "Security", icon: LuShieldCheck },
   ];
 
   return (
@@ -113,7 +110,7 @@ const Profile = () => {
         {/* Header */}
         <div className="mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">
-            My <span className="text-green-600">Account</span>
+            <span className="text-green-600">Account</span>
           </h1>
 
           <p className="text-gray-500 mt-2">
@@ -269,15 +266,6 @@ const Profile = () => {
                 </form>
               </div>
             )}
-            {/* 
-            BUSINESS TAB
-            {activeTab === "business" && (
-              <BusinessDetails
-                formData={formData}
-                setFormData={setFormData}
-                handleUpdate={handleUpdate}
-              />
-            )} */}
 
             {/* ADDRESSES */}
             {activeTab === "addresses" && <AddressManager />}
@@ -374,6 +362,9 @@ const Profile = () => {
                 refreshProfile={() => window.location.reload()}
               />
             )}
+
+            {/* SECURITY */}
+            {activeTab === "security" && <ProfileSecurity />}
           </main>
         </div>
       </div>

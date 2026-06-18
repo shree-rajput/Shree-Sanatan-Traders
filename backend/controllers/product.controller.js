@@ -1,4 +1,75 @@
 const Product = require("../models/Product.model");
+const Category = require("../models/Category.model");
+
+exports.getProducts = async (req, res) => {
+try {
+
+
+const { search, category } = req.query;
+
+let query = {};
+
+console.log("CATEGORY PARAM =>", category);
+
+// 🔍 Search
+if (search) {
+  query.$or = [
+    {
+      name: {
+        $regex: search,
+        $options: "i"
+      }
+    },
+    {
+      description: {
+        $regex: search,
+        $options: "i"
+      }
+    }
+  ];
+}
+
+// 🏷️ Category filter
+if (category && category !== "All") {
+
+  const categoryDoc = await Category.findOne({
+    slug: category.trim()
+  });
+
+  console.log("CATEGORY DOC =>", categoryDoc);
+
+  if (!categoryDoc) {
+    return res.status(404).json({
+      message: "Category not found"
+    });
+  }
+
+  query.category = categoryDoc._id;
+
+}
+
+console.log("FINAL QUERY =>", query);
+
+const products = await Product.find(query)
+  .populate("category");
+
+console.log("PRODUCT COUNT =>", products.length);
+
+res.status(200).json(products);
+
+
+} catch (error) {
+
+
+console.log(error);
+
+res.status(500).json({
+  message: error.message
+});
+
+
+}
+};
 
 exports.createProduct = async (req, res) => {
   try {
@@ -21,28 +92,32 @@ exports.createProduct = async (req, res) => {
   }
 };
 
-exports.getProducts = async (req, res) => {
-  try {
-    const { search, category } = req.query;
-    let query = {};
+// exports.getProducts = async (req, res) => {
+//   try {
+//     const { search, category } = req.query;
+//     let query = {};
 
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } }
-      ];
-    }
+//    if (search) { 
+//     query.$or = [ { name: { $regex: search, $options: "i" } }, 
+//                   { description: { $regex: search, $options: "i" } } 
+//                 ];
+//                }
+// if (category && category !== "All") { // Find category using slug 
+// const categoryDoc = await Category.findOne({ slug: category });
+//  // If category not found 
+//   if (!categoryDoc) { 
+//     return res.status(404).json({ message: "Category not found" }
 
-    if (category && category !== "All") {
-      query.category = category;
-    }
-
-    const products = await Product.find(query).populate("category");
-    res.json(products);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+//     );
+//    }
+//   }
+//     // Match ObjectId properly query.category = categoryDoc._id.toString(); }
+//     const products = await Product.find(query).populate("category");
+//     res.json(products);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 exports.getProduct = async (req, res) => {
   try {

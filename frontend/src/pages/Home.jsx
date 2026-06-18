@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+
 import API from "../services/api";
 import ProductCard from "../components/ProductCard";
 import ProductSkeleton from "../components/ui/ProductSkeleton";
@@ -24,28 +26,28 @@ const CATEGORIES_DATA = [
     name: "PVC accessories",
     desc: "Complete range of fittings for secure connections",
     image: "/images/pvc_acc_cover.png",
-    link: "/products?category=Trailers",
+    link: "/products?category=pvc-pipe",
     className: "lg:col-span-2 lg:row-span-2",
   },
   {
     name: "Irrigation Systems",
     desc: "Smart water management for higher crop yields",
     image: "/images/cat_irrigation_cover.png",
-    link: "/products?category=Irrigation",
+    link: "/products?category=drip",
     className: "lg:col-span-2 lg:row-span-1",
   },
   {
     name: "G. I Item",
     desc: "Essential tools: Band , Flanch , Nipple etc",
     image: "/images/cat_parts_cover.png",
-    link: "/products?category=Tools",
+    link: "/products?category=gi-items",
     className: "lg:col-span-1 lg:row-span-1",
   },
   {
     name: "Pumps & Motors",
     desc: "High-efficiency water pumps",
     image: "/images/cat_pumps_cover.png",
-    link: "/products?category=Pumps",
+    link: "/products?category=filter-items",
     className: "lg:col-span-1 lg:row-span-1",
   },
   // {
@@ -86,14 +88,44 @@ const Home = () => {
   const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  // useEffect(() => {
+  //   console.log("Fetching products for Home page...");
+  //   API.get("/products")
+  //     .then((res) => setProducts(res.data))
+  //     .catch((err) => console.error(err))
+  //     .finally(() => setLoading(false));
+  // }, []);
 
   useEffect(() => {
-    console.log("Fetching products for Home page...");
-    API.get("/products")
-      .then((res) => setProducts(res.data))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, []);
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+
+        const params = new URLSearchParams(location.search);
+
+        const category = params.get("category");
+
+        let url = "/products";
+
+        if (category) {
+          url += `?category=${category}`;
+        }
+
+        console.log("API URL =>", url);
+
+        const res = await API.get(url);
+
+        setProducts(res.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, [location.search]);
 
   return (
     <div className="bg-white font-sans text-gray-900">

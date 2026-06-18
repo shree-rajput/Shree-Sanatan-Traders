@@ -35,25 +35,17 @@ const ProfileSecurity = () => {
         confirmPassword: "",
       });
     } catch (err) {
-      toast.error(
-        err.response?.data?.message ||
-          "Failed to change password"
-      );
+      toast.error(err.response?.data?.message || "Failed to change password");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleChangePassword}
-      className="space-y-6"
-    >
+    <form onSubmit={handleChangePassword} className="space-y-6">
       <div className="flex items-center gap-3 mb-5">
         <LuLock className="text-green-600" size={24} />
-        <h2 className="text-2xl font-bold text-gray-900">
-          Security
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900">Security</h2>
       </div>
 
       <div>

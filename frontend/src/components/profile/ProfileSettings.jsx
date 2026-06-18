@@ -39,26 +39,20 @@ const ProfileSettings = ({ user, onProfileUpdate }) => {
 
   return (
     <form onSubmit={save} className="space-y-6">
-      <SectionHeader title="Settings" description="Adjust account defaults for the marketplace experience." icon={LuSettings} />
+      <SectionHeader
+        title="Settings"
+        description="Adjust account defaults for the marketplace experience."
+        icon={LuSettings}
+      />
       <div className="grid gap-5 md:grid-cols-2">
-        <ProfileInput label="Language" name="language" value={form.language} onChange={handleChange} />
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-700">Currency</label>
-          <select name="currency" value={form.currency} onChange={handleChange} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm outline-none focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10">
-            <option value="INR">INR</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-          </select>
-        </div>
+        <ProfileInput
+          label="Language"
+          name="language"
+          value={form.language}
+          onChange={handleChange}
+        />
         <ProfileInput label="Theme" name="theme" value="Light" disabled />
-        <div className="space-y-2">
-          <label className="block text-sm font-semibold text-gray-700">Account Visibility</label>
-          <select name="accountVisibility" value={form.accountVisibility} onChange={handleChange} className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-sm outline-none focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10">
-            <option value="private">Private</option>
-            <option value="marketplace">Marketplace</option>
-            <option value="public">Public</option>
-          </select>
-        </div>
+        <div className="space-y-2"></div>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
         {[
@@ -80,7 +74,11 @@ const ProfileSettings = ({ user, onProfileUpdate }) => {
           />
         ))}
       </div>
-      <button type="submit" disabled={saving} className="rounded-2xl bg-green-600 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-green-600/20 transition hover:bg-green-700 disabled:opacity-70">
+      <button
+        type="submit"
+        disabled={saving}
+        className="rounded-2xl bg-green-600 px-6 py-3.5 text-sm font-black text-white shadow-lg shadow-green-600/20 transition hover:bg-green-700 disabled:opacity-70"
+      >
         {saving ? "Saving..." : "Save Settings"}
       </button>
     </form>

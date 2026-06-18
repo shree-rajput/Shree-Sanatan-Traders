@@ -22,7 +22,6 @@ const getImageUrl = (path) => {
 
 const tabs = [
   { id: "overview", name: "Overview", icon: LuUser },
-  { id: "business", name: "Business", icon: LuStore },
   { id: "addresses", name: "Addresses", icon: LuMapPin },
   { id: "orders", name: "Orders", icon: LuPackage },
   { id: "notifications", name: "Notifications", icon: LuBell },
@@ -39,21 +38,30 @@ const ProfileSidebar = ({ user, activeTab, onTabChange, onLogout }) => {
       <div className="rounded-3xl border border-gray-200 bg-white p-6 text-center shadow-sm">
         <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-3xl bg-green-100 text-green-700 shadow-sm">
           {avatarUrl ? (
-            <img src={avatarUrl} alt={user?.name || "Profile"} className="h-full w-full object-cover" />
+            <img
+              src={avatarUrl}
+              alt={user?.name || "Profile"}
+              className="h-full w-full object-cover"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-4xl font-black">
               {user?.name?.charAt(0)?.toUpperCase() || "U"}
             </div>
           )}
         </div>
-        <h2 className="truncate text-xl font-black text-gray-900">{user?.name || "Marketplace User"}</h2>
+        <h2 className="truncate text-xl font-black text-gray-900">
+          {user?.name || "Marketplace User"}
+        </h2>
         <p className="mt-1 truncate text-sm text-gray-500">{user?.email}</p>
         <div className="mx-auto mt-4 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1.5 text-xs font-bold capitalize text-green-700">
           <RoleIcon size={14} />
           {user?.userType || user?.role || "user"}
         </div>
         <div className="mt-5">
-          <ProfileCompletion percentage={user?.profileCompletion} missingSteps={user?.missingSteps || []} />
+          <ProfileCompletion
+            percentage={user?.profileCompletion}
+            missingSteps={user?.missingSteps || []}
+          />
         </div>
       </div>
 
