@@ -106,7 +106,12 @@ const orderSchema = new mongoose.Schema(
       timestamp: { type: Date, default: Date.now },
       note: String
     }],
-
+      deliveryCode: {
+   type: String
+},
+deliveryDate: {
+    type: Date
+},
     // ❌ Cancellation / Return
     cancelReason: String,
     returnReason: String,

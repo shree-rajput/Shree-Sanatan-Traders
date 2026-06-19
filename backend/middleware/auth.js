@@ -73,8 +73,4 @@ console.log(error);
 
 res.status(401).json({
   message: "Invalid token"
-});
-
-
-}
-};
+});}};

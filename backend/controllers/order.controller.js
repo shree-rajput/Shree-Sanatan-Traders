@@ -38,7 +38,7 @@ exports.placeOrder = async (req, res) => {
 
       const price = item.price || product.price || (product.variants?.[0]?.price ?? 0);
       productTotal += price * item.quantity;
-
+   
       orderItems.push({
         product: product._id,
         name: product.name,
@@ -46,19 +46,24 @@ exports.placeOrder = async (req, res) => {
         price,
         quantity: item.quantity
       });
-
+           
       // 📦 Reduce stock
       product.stock -= item.quantity;
       product.soldCount = (product.soldCount || 0) + item.quantity;
       await product.save();
     }
 
-    const deliveryCharge = productTotal >= 500 ? 0 : 40; // Free delivery above ₹500
+    const deliveryCharge = productTotal >= 500 ? 40 : 200; // Free delivery above ₹500
     const totalPrice = productTotal + deliveryCharge;
 
-    // ✅ Set estimated delivery (5 days from now)
+    // ✅ Set estimated delivery (3 days from now)
     const estimatedDelivery = new Date();
-    estimatedDelivery.setDate(estimatedDelivery.getDate() + 5);
+    estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
+      
+    const deliveryCode = Math.floor(
+   1000 + Math.random() * 9000
+).toString();
+
 
     const order = await Order.create({
       user: req.user.id,
@@ -70,7 +75,8 @@ exports.placeOrder = async (req, res) => {
       paymentStatus: paymentMethod === "cod" ? "pending" : "pending",
       orderStatus: "pending",
       estimatedDelivery,
-      statusHistory: [{ status: "pending", note: "Order placed successfully" }]
+      statusHistory: [{ status: "pending", note: "Order placed successfully" }],
+      deliveryCode
     });
     
     // 📧 Send confirmation email
@@ -80,6 +86,8 @@ await sendOrderConfirmation(
 req.user.email,
 order
 );}
+
+
  console.log("EMAIL =>", req.user.email);
 console.log("Sending Email...");
 
@@ -252,9 +260,15 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     // Auto update payment status on delivery with COD
-    if (status === "delivered" && order.paymentMethod === "cod") {
+if (status === "delivered") {
+
+   order.deliveredAt = new Date();
+
+   if (order.paymentMethod === "cod") {
       order.paymentStatus = "paid";
-    }
+   }
+}
+
 
     if (trackingId) order.trackingId = trackingId;
 
@@ -263,17 +277,29 @@ exports.updateOrderStatus = async (req, res) => {
       note: note || `Status updated to ${status}`
     });
 
+    if (status === "delivered") {
+
+   order.deliveredAt = new Date();
+
+   if (order.paymentMethod === "cod") {
+      order.paymentStatus = "paid";
+   }
+}
+
     await order.save();
 
-      // 📧 Send status update emai
+    
+    // 📧 Send status update emai
 sendStatusUpdate(
    order.user.email,
    order._id.toString().slice(-8).toUpperCase(),
    status,
    trackingId
-)
+).catch(err => console.error("🔥 Email error:", err));
+
   console.log("EMAIL =>", order.user.email);
 console.log("Sending Status Update Email..."); 
+
 
     res.json({ success: true, message: "Order status updated", order });
 

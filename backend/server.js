@@ -19,7 +19,7 @@ const userRoutes = require("./routes/user.routes");
 const profileRoutes = require("./routes/profile.routes");
 const adminRoutes = require("./routes/admin.routes");
 const addressRoutes = require("./routes/address.routes");
-
+const reviewRoutes = require("./routes/review.route");
 
 // 🔹 Connect DB
 connectDB();
@@ -58,6 +58,9 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/categories", require("./routes/category.routes"));
 app.use("/api/payment", paymentRoutes);
 app.use("/api/addresses", addressRoutes);
+
+
+// 🔹 Admin Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/dashboard-v2", require("./routes/admin/dashboard.routes"));
 app.use("/api/admin/analytics", require("./routes/admin/analytics.routes"));
@@ -69,6 +72,10 @@ app.use("/api/admin/products-v2", require("./routes/admin/product.routes"));
 app.use("/api/admin/coupons", require("./routes/admin/coupon.routes"));
 app.use("/api/admin/reviews", require("./routes/admin/review.routes"));
 app.use("/api/admin/support", require("./routes/admin/support.routes"));
+
+
+// review routes
+app.use("/api/reviews", reviewRoutes);
 
 // 🔹 Root
 app.get("/", (req, res) => {
