@@ -2,6 +2,7 @@
 
 const User = require("../models/User.model");
 const bcrypt = require("bcryptjs");
+const { sendStatusUpdate } = require("../services/email.service");
 
 /**
  * GET PROFILE
@@ -117,6 +118,8 @@ const updateNotifications = async (req, res) => {
       }
     ).select("-password");
 
+    sendStatusUpdate(user.email, "Notification settings updated", "Your notification preferences have been updated.");
+
     return res.status(200).json({
       success: true,
       message: "Notification settings updated",
@@ -140,9 +143,7 @@ const updateSettings = async (req, res) => {
     const userId = req.user?.id || req.user?._id || req.user;
 
     const allowedSettings = {
-      currency: req.body.currency,
       theme: req.body.theme,
-      accountVisibility: req.body.accountVisibility,
       emailPreferences: req.body.emailPreferences,
     };
 
@@ -164,7 +165,7 @@ const updateSettings = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Failed to update settings",
+      message: "Failed to update settings kuchh mistake ho rhi h idhar",
     });
   }
 };

@@ -53,11 +53,13 @@ exports.sendOrderConfirmation = async (to, order) => {
     await transporter.sendMail({
       from: `"Shree Sanatan Traders" <${process.env.EMAIL_USER}>`,
       to,
-      subject: `✅ Order Confirmed #${order._id.toString().slice(-8).toUpperCase()}`,
+      subject: `Order Confirmed #${order._id.toString().slice(-8).toUpperCase()}`,
       html: `
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:32px;border-radius:16px">
           <div style="background:#16a34a;padding:24px;border-radius:12px;text-align:center;margin-bottom:24px">
-            <h1 style="color:white;margin:0;font-size:24px">🌾 Shree Sanatan Traders</h1>
+         
+          <h1 style="color:white;margin:0;font-size:24px">
+           🌾 Shree Sanatan Traders 🌾</h1>
             <p style="color:#bbf7d0;margin:8px 0 0">Your Order is Confirmed!</p>
           </div>
           

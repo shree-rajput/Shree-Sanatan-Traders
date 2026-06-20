@@ -359,6 +359,9 @@ const Profile = () => {
             {activeTab === "settings" && (
               <ProfileSettings
                 user={user}
+                // onProfileUpdate={(updatedUser) => {
+                //   login(updatedUser, localStorage.getItem("token"));
+                // }}
                 refreshProfile={() => window.location.reload()}
               />
             )}

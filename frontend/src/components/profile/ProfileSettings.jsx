@@ -4,17 +4,14 @@ import { LuSettings } from "react-icons/lu";
 import ProfileInput, { SectionHeader, ToggleSwitch } from "./ProfileInput";
 import { updateSettings } from "../../services/profileService";
 
-const ProfileSettings = ({ user, onProfileUpdate }) => {
+const ProfileSettings = ({ user }) => {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     language: user?.language || "English",
-    currency: user?.currency || "INR",
     theme: "light",
-    accountVisibility: user?.accountVisibility || "private",
     emailPreferences: {
       orderUpdates: user?.emailPreferences?.orderUpdates ?? true,
       offers: user?.emailPreferences?.offers ?? false,
-      newsletter: user?.emailPreferences?.newsletter ?? false,
     },
   });
 
@@ -28,10 +25,15 @@ const ProfileSettings = ({ user, onProfileUpdate }) => {
     try {
       setSaving(true);
       const res = await updateSettings(form);
-      onProfileUpdate(res.user);
+      // console.log("ProfileSettings.jsx -> save -> res", res);
+      // onProfileUpdate(res.user);
       toast.success("Settings saved");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to update settings");
+      // console.error(
+      //   "YAHAN fas rha hoon me ....ProfileSettings.jsx -> save -> err",
+      //   err,
+      // );
+      toast.error(err.response?.data?.message);
     } finally {
       setSaving(false);
     }
@@ -57,8 +59,7 @@ const ProfileSettings = ({ user, onProfileUpdate }) => {
       <div className="grid gap-4 md:grid-cols-3">
         {[
           ["orderUpdates", "Order updates", "Email me about order progress."],
-          ["offers", "Offers", "Email me marketplace offers."],
-          ["newsletter", "Newsletter", "Email me weekly marketplace news."],
+          ["offers", "Offers", "Email me about offers and promotions."],
         ].map(([key, label, description]) => (
           <ToggleSwitch
             key={key}

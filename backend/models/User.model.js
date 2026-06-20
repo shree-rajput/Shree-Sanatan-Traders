@@ -122,33 +122,10 @@ gstNumber: {
   trim: true,
   uppercase: true
 },
-
-businessBanner: {
-  type: String,
-  default: ""
-},
-
-farmingType: {
-  type: String,
-  default: ""
-},
-
-soilType: {
-  type: String,
-  default: ""
-},
-
 businessAddress: {
   type: String,
   default: ""
 },
-
-currency: {
-  type: String,
-  enum: ["INR", "USD", "EUR"],
-  default: "INR"
-},
-
 theme: {
   type: String,
   enum: ["light"],
@@ -161,11 +138,6 @@ emailPreferences: {
   newsletter: { type: Boolean, default: false }
 },
 
-accountVisibility: {
-  type: String,
-  enum: ["private", "marketplace", "public"],
-  default: "private"
-},
 
 profileCompletion: {
   type: Number,
@@ -183,16 +155,6 @@ upiId: {
   default: ""
 },
 
-businessLogo: {
-  type: String,
-  default: ""
-},
-
-socialLinks: {
-  instagram: String,
-  facebook: String,
-  youtube: String,
-},
 
 bankDetails: {
   accountHolder: String,
