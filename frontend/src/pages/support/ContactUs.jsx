@@ -45,7 +45,7 @@ const ContactUs = () => {
                    <div>
                       <p className="text-xs font-black uppercase tracking-widest text-green-100 mb-1">{t('our_location')}</p>
                       <p className="text-lg font-bold leading-tight">
-                        Main Market Area, Kargoon,<br/> Madhya Pradesh 451001
+                        Main Market Area, Kargone,<br/> Madhya Pradesh 451001
                       </p>
                    </div>
                 </div>

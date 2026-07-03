@@ -21,6 +21,7 @@ import {
   LuChevronRight as ChevronRight,
 } from "react-icons/lu";
 
+import AiChatWidget from "../components/AiChatWidget";
 const CATEGORIES_DATA = [
   {
     name: "PVC accessories",
@@ -167,6 +168,7 @@ const Home = () => {
         </div>
       </section>
 
+      <AiChatWidget />
       {/* 🧱 SHOP BY CATEGORIES */}
       <section className="max-w-7xl mx-auto px-6 py-24">
         <div className="text-center mb-16">

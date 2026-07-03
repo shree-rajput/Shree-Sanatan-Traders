@@ -70,6 +70,9 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       default: 40
     },
+   deliveredAt: {
+  type: Date
+    },
 
     shippingAddress: {
       type: addressSchema,
@@ -122,7 +125,14 @@ deliveryDate: {
 
     // 📅 Expected delivery date
     estimatedDelivery: Date,
+    invoiceSent: {
+  type: Boolean,
+  default: false,
+},
+
+invoiceSentAt: Date,
   },
+  
   { timestamps: true }
 );
 

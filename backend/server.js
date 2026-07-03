@@ -20,6 +20,7 @@ const profileRoutes = require("./routes/profile.routes");
 const adminRoutes = require("./routes/admin.routes");
 const addressRoutes = require("./routes/address.routes");
 const reviewRoutes = require("./routes/review.route");
+const aiRoutes = require("./routes/ai.route.js");
 
 // 🔹 Connect DB
 connectDB();
@@ -58,8 +59,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/categories", require("./routes/category.routes"));
 app.use("/api/payment", paymentRoutes);
 app.use("/api/addresses", addressRoutes);
-
-
+app.use("/api/ai", aiRoutes);
 // 🔹 Admin Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/admin/dashboard-v2", require("./routes/admin/dashboard.routes"));

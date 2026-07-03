@@ -123,3 +123,53 @@ exports.sendStatusUpdate = async (to, orderNumber, status, trackingId) => {
     console.error("❌ Status email failed:", err.message);
   }
 };
+
+
+const sendInvoiceEmail = async (
+  userEmail,
+  pdfPath,
+  orderId
+) => {
+
+  try {
+
+    await transporter.sendMail({
+
+      from: `"Shree Sanatan Traders" <${process.env.EMAIL_USER}>`,
+
+      to: userEmail,
+
+      subject: `Invoice for Order ${orderId}`,
+
+      html: `
+        <div style="font-family:Arial;padding:20px">
+          <h2>🎉 Order Delivered Successfully</h2>
+
+          <p>Your invoice PDF is attached below.</p>
+
+          <p>Thank you for shopping with Shree Sanatan Traders</p>
+        </div>
+      `,
+
+      attachments: [
+        {
+          filename: `invoice-${orderId}.pdf`,
+          path: pdfPath,
+        },
+      ],
+    });
+
+    console.log("✅ INVOICE EMAIL SENT");
+
+  } catch (err) {
+
+    console.log(
+      "❌ INVOICE EMAIL FAILED =>",
+      err
+    );
+  }
+};
+
+exports.sendInvoiceEmail = sendInvoiceEmail;
+
+// module.exports = sendInvoiceEmail;

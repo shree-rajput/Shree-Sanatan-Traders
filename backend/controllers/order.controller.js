@@ -1,7 +1,7 @@
 const Order = require("../models/Order.model");
 const Product = require("../models/Product.model");
-const {sendOrderConfirmation,sendStatusUpdate} = require("../services/email.service");
-
+const {sendOrderConfirmation,sendStatusUpdate , sendInvoiceEmail} = require("../services/email.service");
+const  generateInvoice  = require("../services/generateInvoice.service.js");
 
 // ============================================================
 // 🛒 PLACE ORDER (User)
@@ -217,96 +217,351 @@ exports.requestReturn = async (req, res) => {
 // ============================================================
 // 🔧 UPDATE ORDER STATUS (Admin)
 // ============================================================
+// exports.updateOrderStatus = async (req, res) => {
+//   try {
+//     const { status, trackingId, note } = req.body;
+//     console.log("🔥 UPDATE STATUS API HIT");
+
+//     const validStatuses = ["pending","confirmed","packed","shipped","out_for_delivery","delivered","cancelled","returned"];
+//     if (!validStatuses.includes(status)) {
+//       return res.status(400).json({ message: "Invalid status" });
+//     }
+//    const order = await Order.findById(req.params.id)
+//   .populate("user");
+//     if (!order) {
+//       return res.status(404).json({ message: "Order not found" });
+//     }
+
+//     const oldStatus = order.orderStatus;
+//     order.orderStatus = status;
+
+//     // ✅ Handle Stock Restoration on Cancellation/Return
+//     const restoredStatuses = ["cancelled", "returned"];
+//     const wasAlreadyRestored = restoredStatuses.includes(oldStatus);
+    
+//     if (restoredStatuses.includes(status) && !wasAlreadyRestored) {
+//       for (const item of order.items) {
+//         await Product.findByIdAndUpdate(item.product, {
+//           $inc: { stock: item.quantity, soldCount: -item.quantity }
+//         });
+//       }
+//     }
+    
+//     // ✅ Re-deduct stock if moved back from Cancelled to active status
+//     if (wasAlreadyRestored && !restoredStatuses.includes(status)) {
+//        for (const item of order.items) {
+//           const prod = await Product.findById(item.product);
+//           if (prod) {
+//              prod.stock -= item.quantity;
+//              prod.soldCount += item.quantity;
+//              await prod.save();
+//           }
+//        }
+//     }
+
+//     // Auto update payment status on delivery with COD
+// if (status === "delivered") {
+
+//    order.deliveredAt = new Date();
+
+//    if (order.paymentMethod === "cod") {
+//       order.paymentStatus = "paid";
+//    }
+// }
+
+
+//     if (trackingId) order.trackingId = trackingId;
+
+//     order.statusHistory.push({
+//       status,
+//       note: note || `Status updated to ${status}`
+//     });
+
+//     if (status === "delivered") {
+
+//    order.deliveredAt = new Date();
+
+//    if (order.paymentMethod === "cod") {
+//       order.paymentStatus = "paid";
+//    }
+// }
+
+
+// // ONLY WHEN DELIVERED
+// if (
+//   status === "delivered" &&
+//   !order.invoiceSent
+// ) {
+
+//   // generate pdf
+//   const pdfPath = await generateInvoice(order);
+
+//   // send email
+//   await sendInvoiceEmail(
+//     order.user.email,
+//     pdfPath,
+//     order._id
+//   );
+
+//   // prevent duplicate
+//   order.invoiceSent = true;
+//   order.invoiceSentAt = new Date();
+// }
+
+// // await order.save();
+
+//     await order.save();
+    
+// // 📧 Send status update emai
+// sendStatusUpdate(
+//    order.user.email,
+//    order._id.toString().slice(-8).toUpperCase(),
+//    status,
+//    trackingId
+// ).catch(err => console.error("🔥 Email error:", err));
+
+//   console.log("EMAIL =>", order.user.email);
+// console.log("Sending Status Update Email..."); 
+
+
+//     res.json({ success: true, message: "Order status updated", order });
+
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
 exports.updateOrderStatus = async (req, res) => {
   try {
+
     const { status, trackingId, note } = req.body;
+
     console.log("🔥 UPDATE STATUS API HIT");
 
-    const validStatuses = ["pending","confirmed","packed","shipped","out_for_delivery","delivered","cancelled","returned"];
+    // =========================================================
+    // VALID STATUSES
+    // =========================================================
+
+    const validStatuses = [
+      "pending",
+      "confirmed",
+      "packed",
+      "shipped",
+      "out_for_delivery",
+      "delivered",
+      "cancelled",
+      "returned"
+    ];
+
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ message: "Invalid status" });
+      return res.status(400).json({
+        message: "Invalid status"
+      });
     }
-   const order = await Order.findById(req.params.id)
-  .populate("user");
+
+    // =========================================================
+    // FIND ORDER
+    // =========================================================
+
+    const order = await Order.findById(req.params.id)
+      .populate("user");
+
     if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      return res.status(404).json({
+        message: "Order not found"
+      });
     }
 
     const oldStatus = order.orderStatus;
+
+    // =========================================================
+    // UPDATE STATUS
+    // =========================================================
+
     order.orderStatus = status;
 
-    // ✅ Handle Stock Restoration on Cancellation/Return
+    // =========================================================
+    // RESTORE STOCK IF CANCELLED / RETURNED
+    // =========================================================
+
     const restoredStatuses = ["cancelled", "returned"];
-    const wasAlreadyRestored = restoredStatuses.includes(oldStatus);
-    
-    if (restoredStatuses.includes(status) && !wasAlreadyRestored) {
+
+    const wasAlreadyRestored =
+      restoredStatuses.includes(oldStatus);
+
+    if (
+      restoredStatuses.includes(status) &&
+      !wasAlreadyRestored
+    ) {
+
       for (const item of order.items) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: item.quantity, soldCount: -item.quantity }
-        });
+
+        await Product.findByIdAndUpdate(
+          item.product,
+          {
+            $inc: {
+              stock: item.quantity,
+              soldCount: -item.quantity
+            }
+          }
+        );
       }
     }
-    
-    // ✅ Re-deduct stock if moved back from Cancelled to active status
-    if (wasAlreadyRestored && !restoredStatuses.includes(status)) {
-       for (const item of order.items) {
-          const prod = await Product.findById(item.product);
-          if (prod) {
-             prod.stock -= item.quantity;
-             prod.soldCount += item.quantity;
-             await prod.save();
-          }
-       }
+
+    // =========================================================
+    // RE-DEDUCT STOCK
+    // =========================================================
+
+    if (
+      wasAlreadyRestored &&
+      !restoredStatuses.includes(status)
+    ) {
+
+      for (const item of order.items) {
+
+        const product = await Product.findById(item.product);
+
+        if (product) {
+
+          product.stock -= item.quantity;
+
+          product.soldCount += item.quantity;
+
+          await product.save();
+        }
+      }
     }
 
-    // Auto update payment status on delivery with COD
-if (status === "delivered") {
+    // =========================================================
+    // TRACKING ID
+    // =========================================================
 
-   order.deliveredAt = new Date();
+    if (trackingId) {
+      order.trackingId = trackingId;
+    }
 
-   if (order.paymentMethod === "cod") {
+    // =========================================================
+    // PAYMENT STATUS FIX
+    // =========================================================
+
+    if (status === "delivered") {
+
+      order.deliveredAt = new Date();
+
+      // ✅ IMPORTANT FIX
       order.paymentStatus = "paid";
-   }
-}
+    }
 
-
-    if (trackingId) order.trackingId = trackingId;
+    // =========================================================
+    // STATUS HISTORY
+    // =========================================================
 
     order.statusHistory.push({
       status,
       note: note || `Status updated to ${status}`
     });
 
-    if (status === "delivered") {
+    // =========================================================
+    // SEND INVOICE
+    // =========================================================
 
-   order.deliveredAt = new Date();
+    if (
+      status === "delivered" &&
+      !order.invoiceSent
+    ) {
 
-   if (order.paymentMethod === "cod") {
-      order.paymentStatus = "paid";
-   }
-}
+      try {
+
+        console.log("📄 GENERATING INVOICE");
+
+        const pdfPath =
+          await generateInvoice(order);
+
+          
+console.log("USER EMAIL =>", order.user.email);
+
+console.log("ORDER CREATED AT =>", order.createdAt);
+
+console.log("ORDER ITEMS =>", order.items);
+
+        console.log("✅ PDF GENERATED");
+
+        await sendInvoiceEmail(
+          order.user.email,
+          pdfPath,
+          order._id
+        );
+
+        console.log("✅ INVOICE EMAIL SENT");
+
+        order.invoiceSent = true;
+
+        order.invoiceSentAt = new Date();
+
+      } catch (invoiceError) {
+
+        console.log(
+          "🔥 INVOICE ERROR =>",
+          invoiceError
+        );
+      }
+    }
+
+    // =========================================================
+    // SAVE ORDER
+    // =========================================================
+
+    console.log("STATUS =>", order.orderStatus);
+
+console.log("PAYMENT =>", order.paymentStatus);
+
+console.log("DELIVERED AT =>", order.deliveredAt);
 
     await order.save();
 
-    
-    // 📧 Send status update emai
-sendStatusUpdate(
-   order.user.email,
-   order._id.toString().slice(-8).toUpperCase(),
-   status,
-   trackingId
-).catch(err => console.error("🔥 Email error:", err));
+    // =========================================================
+    // SEND STATUS UPDATE EMAIL
+    // =========================================================
 
-  console.log("EMAIL =>", order.user.email);
-console.log("Sending Status Update Email..."); 
+    try {
 
+      await sendStatusUpdate(
+        order.user.email,
+        order._id.toString().slice(-8).toUpperCase(),
+        status,
+        trackingId
+      );
 
-    res.json({ success: true, message: "Order status updated", order });
+      console.log("✅ STATUS EMAIL SENT");
+
+    } catch (emailError) {
+
+      console.log(
+        "🔥 STATUS EMAIL ERROR =>",
+        emailError
+      );
+    }
+
+    // =========================================================
+    // RESPONSE
+    // =========================================================
+
+    res.json({
+      success: true,
+      message: "Order status updated successfully",
+      order
+    });
 
   } catch (err) {
-    res.status(500).json({ message: err.message });
+
+    console.log("🔥 UPDATE STATUS ERROR =>", err);
+
+    res.status(500).json({
+      message: err.message
+    });
   }
 };
+
 
 // ============================================================
 // 📊 GET ALL ORDERS (Admin)
