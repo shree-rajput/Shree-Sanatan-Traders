@@ -1,9 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
+import ReactMarkdown from "react-markdown";
 
 export default function AiChatWidget() {
   const [open, setOpen] = useState(false);
-
+  const [language, setLanguage] = useState("en");
   const [message, setMessage] = useState("");
 
   const [messages, setMessages] = useState([
@@ -30,6 +31,7 @@ export default function AiChatWidget() {
     try {
       const res = await axios.post("http://localhost:5000/api/ai/chat", {
         message,
+        language,
       });
 
       setMessages((prev) => [
@@ -97,11 +99,25 @@ export default function AiChatWidget() {
         >
           {/* Header */}
 
-          <div className="bg-green-600 text-white p-4 font-bold">
-            Agriculture AI Assistant
+          <div className="bg-green-600 text-white p-4 font-bold flex items-center justify-between">
+            <span>Krishi AI Assistant</span>
+            <button
+              onClick={() => setOpen(false)}
+              className="ml-2"
+              className="text-white bg-green-600 rounded-full w-6 h-6 flex items-center justify-center"
+            >
+              x
+            </button>
           </div>
 
           {/* Messages */}
+
+          {!language && (
+            <div className="flex gap-4">
+              <button onClick={() => setLanguage("Hindi")}>🇮🇳 हिंदी</button>
+              <button onClick={() => setLanguage("English")}>🇺🇸 English</button>
+            </div>
+          )}
 
           <div className="flex-1 overflow-y-auto p-3 space-y-3">
             {messages.map((msg, i) => (
@@ -117,7 +133,8 @@ export default function AiChatWidget() {
                   }
                 `}
               >
-                {msg.content}
+                {/* {msg.content} */}
+                <ReactMarkdown>{msg.content}</ReactMarkdown>
               </div>
             ))}
 
