@@ -52,7 +52,23 @@ const AdminCoupons = lazy(() => import("./pages/admin/AdminCoupons"));
 const AdminReviews = lazy(() => import("./pages/admin/AdminReviews"));
 const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 
+
+// trials for reserve feature 
+import { useEffect } from "react";
+import {socket} from './socket/socket';
+
 function App() {
+
+  useEffect(() => {
+
+    socket.connect();
+
+    return () => {
+      socket.disconnect();
+    };
+
+  }, []);
+
   return (
     <ThemeProvider>
       <LanguageProvider>

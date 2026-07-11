@@ -13,6 +13,7 @@ import {
   LuTriangleAlert,
 } from "react-icons/lu";
 import toast from "react-hot-toast";
+import { socket } from "../socket/socket";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -24,6 +25,18 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+
+  const [stock, setStock] = useState(product.stock);
+  useEffect(() => {
+    socket.on("stockupdatedd", (data) => {
+      if (data.productId == product._id) {
+        setStock(data.stock);
+      }
+    });
+    return () => {
+      socket.off("stockUpdated");
+    };
+  }, [product]);
 
   useEffect(() => {
     API.get(`/products/${id}`)
@@ -68,9 +81,29 @@ const ProductDetails = () => {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
+  const reserveProduct = async () => {
+    try {
+      const res = await API.post(
+        "/reserve",
+        {
+          productId: product._id,
+          quantity: 1,
+        },
+        {
+          withCredentials: true,
+        },
+      );
+
+      console.log(res.data);
+    } catch (err) {
+      console.log(err.response.data);
+    }
+  };
+
   // 🛍️ Amazon-style Buy Now — skip cart, go straight to checkout with this product
   const handleBuyNow = () => {
     if (isOutOfStock) return;
+    reserveProduct();
     navigate("/checkout", {
       state: {
         buyNowItem: {
@@ -110,7 +143,8 @@ const ProductDetails = () => {
             {isLowStock && !isOutOfStock && (
               <div className="absolute top-6 right-6 z-10">
                 <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
-                  Only {product.stock} left!
+                  {/* Only {product.stock} left! */}
+                  Only {stock} left!
                 </span>
               </div>
             )}
