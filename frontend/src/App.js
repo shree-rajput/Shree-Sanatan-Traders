@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
@@ -54,7 +54,6 @@ const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 
 
 // trials for reserve feature 
-import { useEffect } from "react";
 import {socket} from './socket/socket';
 
 function App() {

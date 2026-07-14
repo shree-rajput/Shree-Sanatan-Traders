@@ -59,15 +59,13 @@ exports.register = async (req, res) => {
 
 
 
-// 🔐 LOGIN (🔥 THIS WAS MISSING)
+// 🔐 LOGIN
 exports.login = async (req, res) => {
-  console.log("📥 Login Request Body:", req.body);
   try {
     const { email, phone, password } = req.body;
     const identifier = email || phone;
 
     if (!identifier || !password) {
-      console.log("⚠️ Validation Failed");
       return res.status(400).json({ message: "Email/Phone and password required" });
     }
 
@@ -75,15 +73,24 @@ exports.login = async (req, res) => {
       $or: [{ email: identifier }, { phone: identifier }]
     });
     if (!user) {
-      return res.status(400).json({ message: "User not found" });
-    }
-
-    // ✅ compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      console.log(`❌ Invalid password for ${identifier}`);
+      // Use generic message to prevent user enumeration attacks
       return res.status(400).json({ message: "Invalid credentials" });
     }
+
+    // ✅ Check if banned before password check
+    if (user.isBanned) {
+      return res.status(403).json({ message: "Your account has been suspended" });
+    }
+
+    // ✅ Compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    // ✅ Update lastLogin timestamp
+    user.lastLogin = new Date();
+    await user.save();
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -91,8 +98,11 @@ exports.login = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    console.log(`✅ Login success for ${identifier}`);
-    res.json({ user, token });
+    // BUG FIX: Strip password before sending — previous code exposed hashed password
+    const userResponse = user.toObject();
+    delete userResponse.password;
+
+    res.json({ user: userResponse, token });
 
   } catch (err) {
     console.error("🔥 Server Error during login:", err);

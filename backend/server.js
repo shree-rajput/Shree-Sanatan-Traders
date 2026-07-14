@@ -8,6 +8,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const connectDB = require("./config/database");
 const path = require("path");
+const http = require("http");
 
 // 🔹 Routes (IMPORTANT: .routes.js naming)
 const authRoutes = require("./routes/auth.routes");
@@ -21,13 +22,15 @@ const adminRoutes = require("./routes/admin.routes");
 const addressRoutes = require("./routes/address.routes");
 const reviewRoutes = require("./routes/review.route");
 const aiRoutes = require("./routes/ai.route.js");
-const { getIO } = require("./services/socket.service.js");
+const { getIO, initializeSocket } = require("./services/socket.service.js");
 const reserveRoutes = require("./routes/reserve.routes.js");
 // 🔹 Connect DB
 connectDB();
 
-// 🔹 Create app
+// 🔹 Create app and server
 const app = express();
+const server = http.createServer(app);
+initializeSocket(server);
 
 // 🔹 Middlewares
 app.use(helmet());
@@ -93,7 +96,7 @@ app.use((err, req, res, next) => {
 
 // 🔹 Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📧 Email configured: ${process.env.EMAIL_USER ? "✅" : "❌ (add EMAIL_USER to .env)"}`);
 });

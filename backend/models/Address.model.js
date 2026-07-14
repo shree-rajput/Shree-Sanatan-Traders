@@ -30,7 +30,8 @@ const addressSchema = new mongoose.Schema(
     },
     state: {
       type: String,
-      required: true
+      required: true,
+      default : "Madhya Pradesh"
     },
     pincode: {
       type: String,
@@ -43,6 +44,10 @@ const addressSchema = new mongoose.Schema(
     isDefault: {
       type: Boolean,
       default: false
+    },
+       coordinates: {
+        latitude: Number,
+        longitude: Number
     }
   },
   { timestamps: true }

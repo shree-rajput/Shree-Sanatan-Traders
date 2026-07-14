@@ -376,7 +376,7 @@ const Home = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {TESTIMONIALS.map((t, i) => (
+            {TESTIMONIALS.map((testimonial, i) => (
               <div
                 key={i}
                 className="bg-white border-2 border-green-50 p-10 rounded-[48px] shadow-sm hover:shadow-2xl hover:border-green-100 transition-all relative group"
@@ -385,7 +385,7 @@ const Home = () => {
                   <MessageSquareQuote size={32} />
                 </div>
                 <div className="flex gap-1 mb-6">
-                  {[...Array(t.rating)].map((_, i) => (
+                  {[...Array(testimonial.rating)].map((_, i) => (
                     <Star
                       key={i}
                       size={18}
@@ -394,15 +394,15 @@ const Home = () => {
                   ))}
                 </div>
                 <p className="text-lg text-gray-600 italic leading-relaxed mb-8 font-medium">
-                  "{t.text}"
+                  "{testimonial.text}"
                 </p>
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-2xl bg-green-600 flex items-center justify-center text-white font-black text-xl shadow-lg shadow-green-100">
-                    {t.name[0]}
+                    {testimonial.name[0]}
                   </div>
                   <div>
                     <h4 className="font-black text-gray-900 text-lg leading-none mb-1">
-                      {t.name}
+                      {testimonial.name}
                     </h4>
                     <p className="text-[10px] text-green-600 font-black uppercase tracking-widest">
                       Happy Farmer

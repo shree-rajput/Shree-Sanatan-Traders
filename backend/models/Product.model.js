@@ -145,6 +145,8 @@ const productSchema = new mongoose.Schema(
 // });
 
 
+// BUG FIX: pre-save hook was missing next() call — while Mongoose 8 allows implicit
+// promise-based hooks, not calling next() can cause hangs in mixed environments. next
 productSchema.pre("save", function () {
   if (this.stock === 0) {
     this.stockStatus = "out_of_stock";
@@ -153,5 +155,6 @@ productSchema.pre("save", function () {
   } else {
     this.stockStatus = "in_stock";
   }
-  });
+  // next();
+});
 module.exports = mongoose.model("Product", productSchema);

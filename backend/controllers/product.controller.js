@@ -75,22 +75,29 @@ exports.createProduct = async (req, res) => {
   try {
     const images = req.files ? req.files.map(file => `/uploads/${file.filename}`) : [];
     
-    // Multer might put non-file fields in req.body
     const productData = { ...req.body };
     if (images.length > 0) productData.images = images;
     
-    // If variants is a string (from form-data), parse it
+    // Parse variants if sent as a JSON string from form-data
     if (typeof productData.variants === "string") {
-      productData.variants = JSON.parse(productData.variants);
+      try {
+        productData.variants = JSON.parse(productData.variants);
+      } catch {
+        return res.status(400).json({ message: "Invalid variants JSON format" });
+      }
     }
 
-    const product = await Product.create(productData).populate("category", "name");
-;
-    res.status(201).json(product);
+    // BUG FIX: Product.create().populate() is invalid — create() returns a document, not a Query.
+    // Calling .populate() on a document throws TypeError. Must call findById().populate() separately.
+    const product = await Product.create(productData);
+    const populated = await Product.findById(product._id).populate("category", "name slug");
+
+    res.status(201).json(populated);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // exports.getProducts = async (req, res) => {
 //   try {

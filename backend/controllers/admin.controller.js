@@ -98,8 +98,12 @@ exports.dashboard = async (req, res) => {
 };
 
 exports.getAllOrders = async (req, res) => {
-  const orders = await Order.find().populate("user");
-  res.json(orders);
+  try {
+    const orders = await Order.find().populate("user");
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 
@@ -148,6 +152,7 @@ exports.createOrder = async (req, res) => {
       items: items.map(i => ({
         product: i.product,
         name: i.name,
+        price: i.price, // Required field
         variant: { type: "Standard", price: i.price },
         quantity: i.quantity
       })),
@@ -155,11 +160,13 @@ exports.createOrder = async (req, res) => {
       paymentStatus: "paid",
       orderStatus: "delivered",
       shippingAddress: {
-        address: "Offline / In-Store",
+        fullName: customerName || "In-Store Customer",
+        mobileNumber: customerPhone || "N/A",
+        houseNo: "Offline",
+        area: "In-Store",
         city: "Bamandi",
         state: "MP",
-        pincode: "000000",
-        phone: customerPhone || "N/A"
+        pincode: "000000"
       }
     });
 

@@ -1,359 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import {
-//   LuPlus,
-//   LuTrash2,
-//   LuMapPin,
-//   LuCheck,
-//   LuLoaderCircle,
-//  LuHouse,
-//   LuBriefcase,
-// } from "react-icons/lu";
-// import API from "../services/api";
-// import toast from "react-hot-toast";
-
-// const AddressManager = () => {
-//   const [addresses, setAddresses] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [showAddModal, setShowAddModal] = useState(false);
-//   const [formData, setFormData] = useState({
-//     fullName: "",
-//     mobileNumber: "",
-//     houseNo: "",
-//     area: "",
-//     landmark: "",
-//     city: "",
-//     state: "",
-//     pincode: "",
-//     isDefault: false,
-//   });
-
-//   const fetchAddresses = async () => {
-//     try {
-//       const res = await API.get("/addresses");
-//       setAddresses(res.data);
-//     } catch (err) {
-//       toast.error("Failed to load addresses");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchAddresses();
-//   }, []);
-
-//   const handleAddAddress = async (e) => {
-//     e.preventDefault();
-//     try {
-//       await API.post("/addresses", formData);
-//       toast.success("Address added!");
-//       setShowAddModal(false);
-//       setFormData({
-//         fullName: "",
-//         mobileNumber: "",
-//         houseNo: "",
-//         area: "",
-//         landmark: "",
-//         city: "",
-//         state: "",
-//         pincode: "",
-//         isDefault: false,
-//       });
-//       fetchAddresses();
-//     } catch (err) {
-//       toast.error(err.response?.data?.message || "Failed to add address");
-//     }
-//   };
-
-//   const handleDelete = async (id) => {
-//     if (!window.confirm("Delete this address?")) return;
-//     try {
-//       await API.delete(`/addresses/${id}`);
-//       toast.success("Address deleted");
-//       fetchAddresses();
-//     } catch (err) {
-//       toast.error("Failed to delete address");
-//     }
-//   };
-
-//   const handleSetDefault = async (id) => {
-//     try {
-//       await API.patch(`/addresses/${id}/default`);
-//       toast.success("Default address updated");
-//       fetchAddresses();
-//     } catch (err) {
-//       toast.error("Failed to update default address");
-//     }
-//   };
-
-//   if (loading)
-//     return (
-//       <div className="flex justify-center p-12">
-//         <LuLoaderCircle className="animate-spin text-green-600" size={32} />
-//       </div>
-//     );
-
-//   return (
-//     <div className="space-y-6 h-[400px] overflow-y-auto">
-//       <div className="flex items-center justify-between mb-8">
-//         <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-//           Saved Addresses
-//         </h3>
-//         <button
-//           onClick={() => setShowAddModal(true)}
-//           className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-green-100 dark:shadow-green-900/20 hover:bg-green-700 transition-all"
-//         >
-//           <LuPlus size={18} />
-//           Add New
-//         </button>
-//       </div>
-
-//       <div className="grid md:grid-cols-2 gap-6">
-//         {addresses.length === 0 ? (
-//           <div className="md:col-span-2 text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-//             <LuMapPin
-//               size={40}
-//               className="mx-auto text-gray-300 dark:text-gray-600 mb-4"
-//             />
-//             <p className="text-gray-500 dark:text-gray-400 font-medium">
-//               No saved addresses yet
-//             </p>
-//           </div>
-//         ) : (
-//           addresses.map((addr) => (
-//             <div
-//               key={addr._id}
-//               className={`relative p-6 rounded-2xl border transition-all ${
-//                 addr.isDefault
-//                   ? "border-green-500 bg-green-50/30 dark:bg-green-900/10 ring-1 ring-green-500"
-//                   : "border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 hover:border-green-200 dark:hover:border-green-900"
-//               }`}
-//             >
-//               {addr.isDefault && (
-//                 <div className="absolute top-4 right-4 flex items-center gap-1.5 px-2.5 py-1 bg-green-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm">
-//                   <LuCheck size={12} />
-//                   Default
-//                 </div>
-//               )}
-
-//               <div className="flex items-start gap-4">
-//                 <div
-//                   className={`p-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600`}
-//                 >
-//                   <LuMapPin size={20} />
-//                 </div>
-//                 <div>
-//                   <h4 className="font-bold text-gray-900 dark:text-white capitalize mb-1">
-//                     {addr.fullName}
-//                   </h4>
-//                   <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-//                     {addr.houseNo}, {addr.area}
-//                     <br />
-//                     {addr.landmark && (
-//                       <>
-//                         {addr.landmark}
-//                         <br />
-//                       </>
-//                     )}
-//                     {addr.city}, {addr.state} - {addr.pincode}
-//                     <br />
-//                     📞 {addr.mobileNumber}
-//                   </p>
-//                 </div>
-//               </div>
-
-//               <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between gap-4">
-//                 <div className="flex items-center gap-4">
-//                   {!addr.isDefault && (
-//                     <button
-//                       onClick={() => handleSetDefault(addr._id)}
-//                       className="text-xs font-bold text-green-600 hover:text-green-700 uppercase tracking-wider"
-//                     >
-//                       Set Default
-//                     </button>
-//                   )}
-//                 </div>
-//                 <button
-//                   onClick={() => handleDelete(addr._id)}
-//                   className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-//                 >
-//                   <LuTrash2 size={18} />
-//                 </button>
-//               </div>
-//             </div>
-//           ))
-//         )}
-//       </div>
-
-//       {/* Add Address Modal */}
-//       {showAddModal && (
-//         <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 h-[400px] w-full mt-8">
-//           <div
-//             className="absolute inset-0 bg-gray-950/60 backdrop-blur-sm"
-//             onClick={() => setShowAddModal(false)}
-//           ></div>
-//           <div className="relative bg-white dark:bg-gray-900 w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-gray-800 animate-in zoom-in-95 duration-200 mt-8">
-//             <div className="p-8 border-b border-gray-100 dark:border-gray-800">
-//               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-//                 Add New Address
-//               </h3>
-//             </div>
-//             <form onSubmit={handleAddAddress} className="p-8 space-y-6">
-//               <div className="grid grid-cols-2 gap-4">
-//                 <div className="col-span-2 space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     Full Name
-//                   </label>
-//                   <input
-//                     required
-//                     type="text"
-//                     value={formData.fullName}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, fullName: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//                 <div className="col-span-2 space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     Mobile Number
-//                   </label>
-//                   <input
-//                     required
-//                     type="tel"
-//                     value={formData.mobileNumber}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, mobileNumber: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//                 <div className="space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     House/Flat No.
-//                   </label>
-//                   <input
-//                     required
-//                     type="text"
-//                     value={formData.houseNo}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, houseNo: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//                 <div className="space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     Area/Street
-//                   </label>
-//                   <input
-//                     required
-//                     type="text"
-//                     value={formData.area}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, area: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//                 <div className="col-span-2 space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     Landmark (Optional)
-//                   </label>
-//                   <input
-//                     type="text"
-//                     value={formData.landmark}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, landmark: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//                 <div className="space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     City
-//                   </label>
-//                   <input
-//                     required
-//                     type="text"
-//                     value={formData.city}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, city: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//                 <div className="space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     State
-//                   </label>
-//                   <input
-//                     required
-//                     type="text"
-//                     value={formData.state}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, state: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//                 <div className="space-y-2">
-//                   <label className="text-xs font-bold text-gray-400 uppercase tracking-widest ml-1">
-//                     Pincode
-//                   </label>
-//                   <input
-//                     required
-//                     type="text"
-//                     value={formData.pincode}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, pincode: e.target.value })
-//                     }
-//                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl focus:bg-white dark:focus:bg-gray-900 focus:border-green-500 outline-none transition-all dark:text-white"
-//                   />
-//                 </div>
-//               </div>
-//               <div className="flex items-center gap-3">
-//                 <input
-//                   type="checkbox"
-//                   id="isDefault"
-//                   checked={formData.isDefault}
-//                   onChange={(e) =>
-//                     setFormData({ ...formData, isDefault: e.target.checked })
-//                   }
-//                   className="w-5 h-5 accent-green-600 rounded-lg"
-//                 />
-//                 <label
-//                   htmlFor="isDefault"
-//                   className="text-sm font-bold text-gray-600 dark:text-gray-400 cursor-pointer"
-//                 >
-//                   Set as default address
-//                 </label>
-//               </div>
-//               <div className="flex gap-4 pt-4">
-//                 <button
-//                   type="button"
-//                   onClick={() => setShowAddModal(false)}
-//                   className="flex-1 px-8 py-4 bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-2xl font-bold hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
-//                 >
-//                   Cancel
-//                 </button>
-//                 <button
-//                   type="submit"
-//                   className="flex-1 px-8 py-4 bg-green-600 text-white rounded-2xl font-bold shadow-lg shadow-green-100 dark:shadow-green-900/20 hover:bg-green-700 transition-all"
-//                 >
-//                   Save Address
-//                 </button>
-//               </div>
-//             </form>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default AddressManager;
-
 import React, { useState, useEffect } from "react";
 import {
   LuPlus,
@@ -363,14 +7,28 @@ import {
   LuLoaderCircle,
   LuHouse,
 } from "react-icons/lu";
-
+import "mapbox-gl/dist/mapbox-gl.css";
+import Map from "react-map-gl/mapbox";
+import { Marker, NavigationControl } from "react-map-gl/mapbox";
 import API from "../services/api";
 import toast from "react-hot-toast";
 
 const AddressManager = () => {
+  const MP_CENTER = {
+    latitude: 23.4733,
+    longitude: 77.947,
+  };
+
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [marker, setMarker] = useState(MP_CENTER);
+  const [isPincodeVerified, setIsPincodeVerified] = useState(false);
+  const [isLocationSelected, setIsLocationSelected] = useState(false);
+
+  // if (!process.env.REACT_APP_MAPBOX_TOKEN) {
+  //   return <div>Mapbox token missing</div>;
+  // }
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -379,8 +37,12 @@ const AddressManager = () => {
     area: "",
     landmark: "",
     city: "",
-    state: "",
+    state: "Madhya Pradesh",
     pincode: "",
+
+    latitude: null,
+    longitude: null,
+
     isDefault: false,
   });
 
@@ -399,14 +61,92 @@ const AddressManager = () => {
     fetchAddresses();
   }, []);
 
+  const getCurrentLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        setMarker({
+          latitude: lat,
+          longitude: lng,
+        });
+
+        setFormData((prev) => ({
+          ...prev,
+          latitude: lat,
+          longitude: lng,
+        }));
+        setIsLocationSelected(true);
+        reverseGeocode(lat, lng);
+      },
+      () => {
+        toast.error("Unable to get location");
+      },
+    );
+  };
+
+  const reverseGeocode = async (lat, lng) => {
+    try {
+      const res = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.REACT_APP_MAPBOX_TOKEN}`,
+      );
+
+      const data = await res.json();
+
+      const place = data.features?.[0];
+
+      if (!place) return;
+
+      const district =
+        place.context?.find((x) => x.id.includes("district"))?.text || "";
+
+      const region =
+        place.context?.find((x) => x.id.includes("region"))?.text ||
+        "Madhya Pradesh";
+
+      const detectedPincode =
+        place.context?.find((x) => x.id.includes("postcode"))?.text || "";
+
+      setFormData((prev) => ({
+        ...prev,
+        city: district,
+        state: region,
+        pincode: detectedPincode,
+      }));
+
+      if (detectedPincode.length === 6) {
+        fetchAddress(detectedPincode);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleAddAddress = async (e) => {
     e.preventDefault();
 
     try {
-      await API.post("/addresses", formData);
+      if (!isPincodeVerified) {
+        toast.error("Verify a valid pincode first.");
+        return;
+      }
 
+      if (!isLocationSelected) {
+        toast.error("Please select delivery location on map.");
+        return;
+      }
+
+      await API.post("/addresses", {
+        ...formData,
+        coordinates: {
+          latitude: formData.latitude,
+          longitude: formData.longitude,
+        },
+      });
       toast.success("Address added!");
 
+      resetForm();
       setShowAddModal(false);
 
       setFormData({
@@ -416,15 +156,41 @@ const AddressManager = () => {
         area: "",
         landmark: "",
         city: "",
-        state: "",
+        state: "Madhya Pradesh",
         pincode: "",
+        latitude: null,
+        longitude: null,
         isDefault: false,
       });
+
+      setMarker(MP_CENTER);
+      setIsPincodeVerified(false);
+      setIsLocationSelected(false);
 
       fetchAddresses();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add address");
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      fullName: "",
+      mobileNumber: "",
+      houseNo: "",
+      area: "",
+      landmark: "",
+      city: "",
+      state: "Madhya Pradesh",
+      pincode: "",
+      latitude: null,
+      longitude: null,
+      isDefault: false,
+    });
+
+    setMarker(MP_CENTER);
+    setIsPincodeVerified(false);
+    setIsLocationSelected(false);
   };
 
   const handleDelete = async (id) => {
@@ -469,6 +235,18 @@ const AddressManager = () => {
           city: office.District,
           state: office.State,
         }));
+
+        setIsPincodeVerified(true);
+      } else {
+        setIsPincodeVerified(false);
+
+        setFormData((prev) => ({
+          ...prev,
+          city: "",
+          state: "",
+        }));
+
+        toast.error("Please enter a valid pincode");
       }
     } catch (err) {
       console.error(err);
@@ -629,6 +407,52 @@ const AddressManager = () => {
               </div>
             </div>
 
+            {/* add current location */}
+            <button
+              onClick={getCurrentLocation}
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:scale-[1.01]"
+            >
+              Use Current Location
+            </button>
+            <Map
+              mapboxAccessToken={process.env.REACT_APP_MAPBOX_TOKEN}
+              viewState={{
+                latitude: marker.latitude,
+                longitude: marker.longitude,
+                zoom: 7,
+              }}
+              style={{
+                width: "100%",
+                height: 300,
+                borderRadius: "20px",
+              }}
+              mapStyle="mapbox://styles/mapbox/streets-v12"
+            >
+              <NavigationControl position="top-right" />
+
+              <Marker
+                latitude={marker.latitude}
+                longitude={marker.longitude}
+                draggable
+                onDragEnd={(e) => {
+                  const lat = e.lngLat.lat;
+                  const lng = e.lngLat.lng;
+
+                  setMarker({
+                    latitude: lat,
+                    longitude: lng,
+                  });
+
+                  setFormData((prev) => ({
+                    ...prev,
+                    latitude: lat,
+                    longitude: lng,
+                  }));
+                  setIsLocationSelected(true);
+                  reverseGeocode(lat, lng);
+                }}
+              />
+            </Map>
             {/* FORM */}
             <form
               onSubmit={handleAddAddress}
@@ -693,9 +517,24 @@ const AddressManager = () => {
                         ...prev,
                         pincode: pin,
                       }));
+
+                      setIsPincodeVerified(false);
                     }}
                     className="w-full px-4 sm:px-5 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 outline-none transition-all text-sm sm:text-base"
                   />
+                  {formData.pincode.length === 6 && (
+                    <div className="mt-2">
+                      {isPincodeVerified ? (
+                        <p className="text-green-600 text-sm font-semibold">
+                          ✓ Pincode verified
+                        </p>
+                      ) : (
+                        <p className="text-red-500 text-sm font-semibold">
+                          ✗ Invalid pincode
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* HOUSE */}
@@ -836,7 +675,12 @@ const AddressManager = () => {
 
                 <button
                   type="submit"
-                  className="w-full sm:flex-1 px-6 py-3.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-green-500/20 hover:scale-[1.01] transition-all"
+                  disabled={!isPincodeVerified || !isLocationSelected}
+                  className={`w-full sm:flex-1 px-6 py-3.5 rounded-2xl font-bold transition-all ${
+                    isPincodeVerified && isLocationSelected
+                      ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:scale-[1.01]"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
                 >
                   Save Address
                 </button>

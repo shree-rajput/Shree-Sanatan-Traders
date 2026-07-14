@@ -71,7 +71,7 @@ const ProductCard = ({ product }) => {
       > */}
             <Link
                 to={`/product/${product._id}`}
-                className={`aspect-square rounded-xl overflow-hidden bg-gray-50 mb-4 block}`}
+                className={`aspect-square rounded-xl overflow-hidden bg-gray-50 mb-4 block`}
             >
                 <img
                     src={imageUrl}

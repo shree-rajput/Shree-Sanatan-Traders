@@ -14,6 +14,9 @@ import {
 } from "react-icons/lu";
 import toast from "react-hot-toast";
 import { socket } from "../socket/socket";
+import { Rating } from "@smastrom/react-rating";
+import "@smastrom/react-rating/style.css";
+import { LuStar } from "react-icons/lu";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -25,11 +28,19 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
+  const [reviews, setReviews] = useState([]);
 
-  const [stock, setStock] = useState(product.stock);
+  const [stock, setStock] = useState(null);
+
   useEffect(() => {
-    socket.on("stockupdatedd", (data) => {
-      if (data.productId == product._id) {
+    if (product) {
+      setStock(product.stock);
+    }
+  }, [product]);
+
+  useEffect(() => {
+    socket.on("stockUpdated", (data) => {
+      if (product && data.productId == product._id) {
         setStock(data.stock);
       }
     });
@@ -43,6 +54,11 @@ const ProductDetails = () => {
       .then((res) => setProduct(res.data))
       .catch((err) => console.error("Error fetching product:", err))
       .finally(() => setLoading(false));
+
+    // Fetch approved reviews
+    API.get(`/reviews/${id}`)
+      .then((res) => setReviews(res.data.reviews || []))
+      .catch((err) => console.error("Error fetching reviews:", err));
   }, [id]);
 
   if (loading)
@@ -286,6 +302,52 @@ const ProductDetails = () => {
               {t("whatsapp_order")}
             </a>
           </div>
+        </div>
+
+        {/* Product Reviews Section */}
+        <div className="mt-20 border-t border-gray-100 pt-16">
+          <div className="flex items-center justify-between mb-10">
+            <h2 className="text-3xl font-black text-gray-900">Customer Reviews</h2>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-black text-gray-900">
+                {reviews.length > 0 
+                  ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) 
+                  : "0.0"}
+              </span>
+              <div className="flex items-center text-yellow-400">
+                <LuStar className="fill-current" size={24} />
+              </div>
+              <span className="text-gray-500 font-medium ml-2">({reviews.length} reviews)</span>
+            </div>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="text-center py-12 bg-gray-50 rounded-3xl border border-gray-100">
+              <p className="text-gray-500 font-medium">No reviews yet. Be the first to review after purchasing!</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {reviews.map((review) => (
+                <div key={review._id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-black text-lg">
+                      {review.user?.name?.charAt(0) || "C"}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900">{review.user?.name || "Customer"}</h4>
+                      <p className="text-xs text-gray-400 font-medium">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <Rating value={review.rating} readOnly style={{ maxWidth: 100 }} className="mb-3" />
+                  {review.comment && (
+                    <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

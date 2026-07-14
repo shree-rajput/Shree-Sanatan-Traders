@@ -56,9 +56,10 @@ exports.placeOrder = async (req, res) => {
     const deliveryCharge = productTotal >= 500 ? 40 : 200; // Free delivery above ₹500
     const totalPrice = productTotal + deliveryCharge;
 
-    // ✅ Set estimated delivery (3 days from now)
+    // ✅ Set estimated delivery (3 business days from now, End of Day)
     const estimatedDelivery = new Date();
     estimatedDelivery.setDate(estimatedDelivery.getDate() + 3);
+    estimatedDelivery.setHours(23, 59, 59, 999);
       
     const deliveryCode = Math.floor(
    1000 + Math.random() * 9000
@@ -141,7 +142,10 @@ exports.getOrder = async (req, res) => {
 exports.cancelOrder = async (req, res) => {
   try {
     const { reason } = req.body;
-    const order = await Order.findOne({ _id: req.params.id, user: req.user.id });
+    // BUG FIX: Added .populate("user") — order.user was a raw ObjectId, not a document.
+    // order.user.email was undefined, causing email send to silently fail.
+    const order = await Order.findOne({ _id: req.params.id, user: req.user.id })
+      .populate("user", "name email phone");
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -166,15 +170,15 @@ exports.cancelOrder = async (req, res) => {
     order.statusHistory.push({ status: "cancelled", note: reason || "Cancelled by customer" });
     await order.save();
 
-    // 📧 Send status update email
-if (order.user && order.user.email) {
-await sendStatusUpdate(
-order.user.email,
-order
-);
-}
-console.log("EMAIL =>", order.user.email);
-console.log("Sending Status Update Email...");
+    // 📧 Send status update email (non-blocking)
+    if (order.user?.email) {
+      sendStatusUpdate(
+        order.user.email,
+        order._id.toString().slice(-8).toUpperCase(),
+        "cancelled",
+        null
+      ).catch(err => console.error("🔥 Cancel email error:", err));
+    }
 
     res.json({ success: true, message: "Order cancelled successfully", order });
 
@@ -182,6 +186,7 @@ console.log("Sending Status Update Email...");
     res.status(500).json({ message: err.message });
   }
 };
+
 
 // ============================================================
 // 🔄 REQUEST RETURN (User)
@@ -441,17 +446,17 @@ exports.updateOrderStatus = async (req, res) => {
     }
 
     // =========================================================
-    // PAYMENT STATUS FIX
+    // PAYMENT STATUS FIX (ONLY FOR COD)
     // =========================================================
 
-    if (status === "delivered") {
-
+    if (status === "delivered" && oldStatus !== "delivered") {
       order.deliveredAt = new Date();
 
-      // ✅ IMPORTANT FIX
-      order.paymentStatus = "paid";
+      if (order.paymentMethod === "cod") {
+        order.paymentStatus = "paid";
+      }
     }
-
+await order.save();
     // =========================================================
     // STATUS HISTORY
     // =========================================================
@@ -510,7 +515,6 @@ console.log("ORDER ITEMS =>", order.items);
     // =========================================================
     // SAVE ORDER
     // =========================================================
-
     console.log("STATUS =>", order.orderStatus);
 
 console.log("PAYMENT =>", order.paymentStatus);

@@ -44,14 +44,9 @@ const TIMELINE = [
     icon: <PackageCheck size={18} />,
   },
   {
-    key: "shipped",
-    label: "Shipped",
-    icon: <Truck size={18} />,
-  },
-  {
     key: "out_for_delivery",
     label: "Out for Delivery",
-    icon: <Bike size={18} />,
+    icon: <Truck size={18} />,
   },
   {
     key: "delivered",
@@ -64,7 +59,6 @@ const STATUS_ORDER = [
   "pending",
   "confirmed",
   "packed",
-  "shipped",
   "out_for_delivery",
   "delivered",
 ];
@@ -252,16 +246,23 @@ const OrderDetails = () => {
                       <React.Fragment key={step.key}>
                         <div className="flex flex-col items-center gap-3">
                           <div
-                            className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all
+                            className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-500 ease-in-out transform
                             ${
                               done
-                                ? "bg-green-600 border-green-600 text-white"
-                                : "bg-white border-gray-300 text-gray-400"
+                                ? "bg-green-600 border-green-600 text-white scale-110 shadow-lg"
+                                : "bg-white border-gray-300 text-gray-400 scale-100"
                             }
-                            ${active ? "ring-4 ring-green-100" : ""}
+                            ${active ? "ring-4 ring-green-100 animate-bounce" : ""}
                             `}
                           >
-                            {done ? <Check size={18} /> : step.icon}
+                            {done ? (
+                              <Check
+                                size={18}
+                                className="animate-in fade-in zoom-in duration-300"
+                              />
+                            ) : (
+                              step.icon
+                            )}
                           </div>
 
                           <p
@@ -274,11 +275,14 @@ const OrderDetails = () => {
                         </div>
 
                         {idx < TIMELINE.length - 1 && (
-                          <div
-                            className={`flex-1 h-1 mx-2 rounded-full
-                            ${idx < currentIdx ? "bg-green-500" : "bg-gray-200"}
-                            `}
-                          />
+                          <div className="flex-1 h-1 mx-2 rounded-full bg-gray-200 overflow-hidden relative">
+                            <div
+                              className={`absolute top-0 left-0 h-full rounded-full bg-green-500 transition-all duration-700 ease-in-out`}
+                              style={{
+                                width: idx < currentIdx ? "100%" : "0%",
+                              }}
+                            />
+                          </div>
                         )}
                       </React.Fragment>
                     );
@@ -430,9 +434,10 @@ const OrderDetails = () => {
                     {new Date(order.estimatedDelivery).toLocaleDateString(
                       "en-IN",
                       {
-                        weekday: "long",
+                        weekday: "short",
                         day: "numeric",
-                        month: "long",
+                        month: "short",
+                        year: "numeric",
                       },
                     )}
                   </h3>

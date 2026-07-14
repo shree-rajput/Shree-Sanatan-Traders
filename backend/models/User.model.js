@@ -128,7 +128,7 @@ businessAddress: {
 },
 theme: {
   type: String,
-  enum: ["light"],
+  enum: ["light", "dark"],
   default: "light"
 },
 

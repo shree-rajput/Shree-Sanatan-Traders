@@ -111,11 +111,21 @@ exports.sendStatusUpdate = async (to, orderNumber, status, trackingId) => {
       to,
       subject: `${statusEmoji[status] || "📋"} Order Update — #${orderNumber}`,
       html: `
-        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px">
-          <h2>Order #${orderNumber} Update</h2>
-          <p>Your order status has been updated to: <strong style="color:#16a34a">${status.replace(/_/g," ").toUpperCase()}</strong></p>
-          ${trackingId ? `<p>Tracking ID: <strong>${trackingId}</strong></p>` : ""}
-          <a href="https://shree-sanatan-traders.com/orders" style="display:inline-block;background:#16a34a;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">View Order</a>
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:32px;border-radius:16px">
+          <div style="background:#16a34a;padding:24px;border-radius:12px;text-align:center;margin-bottom:24px">
+            <h1 style="color:white;margin:0;font-size:24px">🌾 Shree Sanatan Traders 🌾</h1>
+            <p style="color:#bbf7d0;margin:8px 0 0">Order Status Update</p>
+          </div>
+          
+          <div style="background:white;padding:24px;border-radius:12px;margin-bottom:16px;text-align:center">
+            <h2 style="color:#111827;margin:0 0 16px">Order #${orderNumber}</h2>
+            <p style="font-size:18px;color:#374151">Your order is now: <strong style="color:#16a34a;font-size:20px">${status.replace(/_/g," ").toUpperCase()}</strong></p>
+            ${trackingId ? `<div style="margin-top:20px;padding:16px;background:#eff6ff;border-radius:8px"><p style="color:#1e3a8a;margin:0">Tracking ID: <strong>${trackingId}</strong></p></div>` : ""}
+          </div>
+          
+          <div style="text-align:center;margin-top:24px">
+            <a href="https://shree-sanatan-traders.com/orders" style="display:inline-block;background:#16a34a;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:bold">View Order Details</a>
+          </div>
         </div>
       `
     });
@@ -142,12 +152,20 @@ const sendInvoiceEmail = async (
       subject: `Invoice for Order ${orderId}`,
 
       html: `
-        <div style="font-family:Arial;padding:20px">
-          <h2>🎉 Order Delivered Successfully</h2>
-
-          <p>Your invoice PDF is attached below.</p>
-
-          <p>Thank you for shopping with Shree Sanatan Traders</p>
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f9fafb;padding:32px;border-radius:16px">
+          <div style="background:#16a34a;padding:24px;border-radius:12px;text-align:center;margin-bottom:24px">
+            <h1 style="color:white;margin:0;font-size:24px">🌾 Shree Sanatan Traders 🌾</h1>
+            <p style="color:#bbf7d0;margin:8px 0 0">Order Delivered Successfully!</p>
+          </div>
+          <div style="background:white;padding:24px;border-radius:12px;margin-bottom:16px;text-align:center">
+            <h2 style="color:#111827;margin:0 0 16px">Thank you for your purchase!</h2>
+            <p style="color:#4b5563;line-height:1.6">Your order #${orderId.toString().slice(-8).toUpperCase()} has been successfully delivered. Please find your official invoice attached to this email.</p>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;padding:16px;border-radius:12px;text-align:center">
+            <p style="color:#166534;margin:0;font-size:14px">
+              📱 Need help? WhatsApp us: <a href="https://wa.me/917987805929" style="color:#16a34a">+91 79878 05929</a>
+            </p>
+          </div>
         </div>
       `,
 
