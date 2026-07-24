@@ -12,6 +12,10 @@ import {
   LuShoppingBag,
   LuStar,
   LuUsers,
+  LuTrendingUp,
+  LuScanLine,
+  LuFileText,
+  LuBadgeAlert,
 } from "react-icons/lu";
 
 export const adminLinks = [
@@ -20,6 +24,10 @@ export const adminLinks = [
   { name: "Orders", path: "/admin/orders", icon: LuShoppingBag },
   { name: "Users", path: "/admin/users", icon: LuUsers },
   { name: "Inventory", path: "/admin/inventory", icon: LuBoxes },
+  { name: "Low Stock", path: "/admin/low-stock", icon: LuBadgeAlert },
+  { name: "Barcode Scanner", path: "/admin/barcode-scanner", icon: LuScanLine },
+  { name: "Purchase Orders", path: "/admin/purchases", icon: LuFileText },
+  { name: "AI Inventory", path: "/admin/ai-inventory", icon: LuTrendingUp },
   { name: "Analytics", path: "/admin/analytics", icon: LuChartBar },
   { name: "Notifications", path: "/admin/notifications", icon: LuBell },
   { name: "Coupons", path: "/admin/coupons", icon: LuBadgePercent },

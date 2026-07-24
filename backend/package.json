@@ -31,6 +31,7 @@
     "nodemailer": "^8.0.7",
     "otp-generator": "^4.0.1",
     "pdfkit": "^0.19.1",
+    "qrcode": "^1.5.4",
     "razorpay": "^2.9.6",
     "slugify": "^1.6.8",
     "socket.io": "^4.8.3",

@@ -190,4 +190,31 @@ const sendInvoiceEmail = async (
 
 exports.sendInvoiceEmail = sendInvoiceEmail;
 
-// module.exports = sendInvoiceEmail;
+exports.sendLowStockEmail = async (adminEmail, lowStockProducts) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log("📧 Email not configured — skipping low stock email");
+    return;
+  }
+
+  let productListHTML = lowStockProducts.map(
+    (p) => `<li><b>${p.name}</b> (SKU: ${p.sku}): ${p.stock} remaining (Threshold: ${p.lowStockThreshold || 5})</li>`
+  ).join("");
+
+  try {
+    await transporter.sendMail({
+      from: `"Inventory System" <${process.env.EMAIL_USER}>`,
+      to: adminEmail,
+      subject: "🚨 Low Stock Alert - Action Required",
+      html: `
+        <h2>Low Stock Alert</h2>
+        <p>The following products are running low on stock and need to be reordered soon:</p>
+        <ul>${productListHTML}</ul>
+        <br>
+        <p>Please log in to the admin dashboard to generate purchase orders.</p>
+      `,
+    });
+    console.log(`✅ Low stock email sent to ${adminEmail}`);
+  } catch (err) {
+    console.error("❌ Low stock email failed:", err.message);
+  }
+};

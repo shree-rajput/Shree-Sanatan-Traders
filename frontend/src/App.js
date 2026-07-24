@@ -1,10 +1,11 @@
-import React, { useState, useEffect, Suspense, lazy } from "react";
+import React, { useEffect, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { socket } from "./socket/socket";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
@@ -14,7 +15,7 @@ import UserLayout from "./layouts/UserLayout";
 import AdminLayout from "./layouts/AdminLayout";
 
 import "./index.css";
-import ProductSkeleton from "./components/ui/ProductSkeleton";
+
 import TrialCompo from "./components/TrialCompo";
 
 // 📦 Lazy Pages
@@ -45,6 +46,10 @@ const AdminOrders = lazy(() => import("./pages/admin/AdminOrders"));
 const AdminCustomers = lazy(() => import("./pages/admin/Customers"));
 const AdminSuppliers = lazy(() => import("./pages/admin/Suppliers"));
 const AdminAnalytics = lazy(() => import("./pages/admin/AdminAnalytics"));
+const InventoryAnalytics = lazy(() => import("./pages/admin/InventoryAnalytics"));
+const BarcodeScanner = lazy(() => import("./pages/admin/BarcodeScanner"));
+const PurchaseOrders = lazy(() => import("./pages/admin/PurchaseOrders"));
+const LowStockAlerts = lazy(() => import("./pages/admin/LowStockAlerts"));
 const AdminSettings = lazy(() => import("./pages/admin/AdminSettings"));
 const AdminUsers = lazy(() => import("./pages/admin/AdminUsers"));
 const AdminNotifications = lazy(() => import("./pages/admin/AdminNotifications"));
@@ -54,19 +59,19 @@ const AdminSupport = lazy(() => import("./pages/admin/AdminSupport"));
 
 
 // trials for reserve feature 
-import {socket} from './socket/socket';
+// import {socket} from './socket/socket.js';
 
 function App() {
 
-  useEffect(() => {
+  // useEffect(() => {
 
-    socket.connect();
+  //   socket.connect();
 
-    return () => {
-      socket.disconnect();
-    };
+  //   return () => {
+  //     socket.disconnect();
+  //   };
 
-  }, []);
+  // }, []);
 
   return (
     <ThemeProvider>
@@ -129,6 +134,10 @@ function App() {
                     <Route path="suppliers" element={<AdminSuppliers />} />
                     <Route path="reports" element={<AdminAnalytics />} />
                     <Route path="analytics" element={<AdminAnalytics />} />
+                    <Route path="ai-inventory" element={<InventoryAnalytics />} />
+                    <Route path="barcode-scanner" element={<BarcodeScanner />} />
+                    <Route path="purchases" element={<PurchaseOrders />} />
+                    <Route path="low-stock" element={<LowStockAlerts />} />
                     <Route path="notifications" element={<AdminNotifications />} />
                     <Route path="coupons" element={<AdminCoupons />} />
                     <Route path="reviews" element={<AdminReviews />} />

@@ -27,6 +27,9 @@ const reserveRoutes = require("./routes/reserve.routes.js");
 // 🔹 Connect DB
 connectDB();
 
+// 🔹 Initialize Cron Jobs
+require("./cron/inventoryAlerts");
+
 // 🔹 Create app and server
 const app = express();
 const server = http.createServer(app);
@@ -78,6 +81,8 @@ app.use("/api/admin/products-v2", require("./routes/admin/product.routes"));
 app.use("/api/admin/coupons", require("./routes/admin/coupon.routes"));
 app.use("/api/admin/reviews", require("./routes/admin/review.routes"));
 app.use("/api/admin/support", require("./routes/admin/support.routes"));
+app.use("/api/admin/barcode", require("./routes/admin/barcode.routes"));
+app.use("/api/admin/purchases", require("./routes/admin/purchase.routes"));
 
 
 // review routes

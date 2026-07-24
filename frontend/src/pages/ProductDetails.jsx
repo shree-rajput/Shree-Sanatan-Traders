@@ -17,6 +17,9 @@ import { socket } from "../socket/socket";
 import { Rating } from "@smastrom/react-rating";
 import "@smastrom/react-rating/style.css";
 import { LuStar } from "react-icons/lu";
+import ProductCard from "../components/ProductCard";
+import ProductSkeleton from "../components/ui/ProductSkeleton";
+import { LuPackage, LuSearch } from "react-icons/lu";
 
 const ProductDetails = () => {
   const { id } = useParams();
@@ -25,6 +28,7 @@ const ProductDetails = () => {
   const { t } = useLanguage();
 
   const [product, setProduct] = useState(null);
+  const [products, setProducts] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [isAdded, setIsAdded] = useState(false);
@@ -40,7 +44,7 @@ const ProductDetails = () => {
 
   useEffect(() => {
     socket.on("stockUpdated", (data) => {
-      if (product && data.productId == product._id) {
+      if (product && data.productId === product._id) {
         setStock(data.stock);
       }
     });
@@ -60,6 +64,18 @@ const ProductDetails = () => {
       .then((res) => setReviews(res.data.reviews || []))
       .catch((err) => console.error("Error fetching reviews:", err));
   }, [id]);
+
+  // for all products
+  useEffect(() => {
+    API.get("/products")
+      .then((res) => {
+        // Handle different response formats if necessary
+        const data = res.data?.products || res.data || [];
+        setProducts(data);
+      })
+      .catch((err) => console.error("Error fetching products:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
   if (loading)
     return (
@@ -307,48 +323,92 @@ const ProductDetails = () => {
         {/* Product Reviews Section */}
         <div className="mt-20 border-t border-gray-100 pt-16">
           <div className="flex items-center justify-between mb-10">
-            <h2 className="text-3xl font-black text-gray-900">Customer Reviews</h2>
+            <h2 className="text-3xl font-black text-gray-900">
+              Customer Reviews
+            </h2>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-black text-gray-900">
-                {reviews.length > 0 
-                  ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1) 
+                {reviews.length > 0
+                  ? (
+                      reviews.reduce((acc, r) => acc + r.rating, 0) /
+                      reviews.length
+                    ).toFixed(1)
                   : "0.0"}
               </span>
               <div className="flex items-center text-yellow-400">
                 <LuStar className="fill-current" size={24} />
               </div>
-              <span className="text-gray-500 font-medium ml-2">({reviews.length} reviews)</span>
+              <span className="text-gray-500 font-medium ml-2">
+                ({reviews.length} reviews)
+              </span>
             </div>
           </div>
 
           {reviews.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-3xl border border-gray-100">
-              <p className="text-gray-500 font-medium">No reviews yet. Be the first to review after purchasing!</p>
+              <p className="text-gray-500 font-medium">
+                No reviews yet. Be the first to review after purchasing!
+              </p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {reviews.map((review) => (
-                <div key={review._id} className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <div
+                  key={review._id}
+                  className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
                   <div className="flex items-center gap-4 mb-4">
                     <div className="w-12 h-12 bg-green-100 text-green-700 rounded-full flex items-center justify-center font-black text-lg">
                       {review.user?.name?.charAt(0) || "C"}
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-900">{review.user?.name || "Customer"}</h4>
+                      <h4 className="font-bold text-gray-900">
+                        {review.user?.name || "Customer"}
+                      </h4>
                       <p className="text-xs text-gray-400 font-medium">
                         {new Date(review.createdAt).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
-                  <Rating value={review.rating} readOnly style={{ maxWidth: 100 }} className="mb-3" />
+                  <Rating
+                    value={review.rating}
+                    readOnly
+                    style={{ maxWidth: 100 }}
+                    className="mb-3"
+                  />
                   {review.comment && (
-                    <p className="text-gray-600 text-sm leading-relaxed">{review.comment}</p>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {review.comment}
+                    </p>
                   )}
                 </div>
               ))}
             </div>
           )}
         </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-6 mt-12">
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {[...Array(8)].map((_, i) => (
+              <ProductSkeleton key={i} />
+            ))}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="py-20 text-center bg-white rounded-3xl border border-gray-100 shadow-sm">
+            <LuPackage size={48} className="mx-auto text-gray-200 mb-4" />
+            <h2 className="text-xl font-bold text-gray-900">No More found</h2>
+            <p className="text-gray-500 mt-1">
+              Try a different search term or check back later.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product._id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
